@@ -193,16 +193,13 @@ contains
     integer :: i,n
 
     n = 1
-
     do i = 1, DT%max_depth
-      write(*,*) DT%node(n)%feature
       if (DT%node(n)%feature .eq. -1) Exit
       if (input(DT%node(n)%feature) .le. DT%node(n)%threshold) then
         n = DT%node(n)%children_left
       else
         n = DT%node(n)%children_right
       end if
-      write(*,*) n
     end do
 
     predict_Decision_Tree = DT%node(n)%values
