@@ -1,0 +1,19 @@
+& Neural_n_layer
+IN_n_layers = 5
+/
+
+& Neural_layer_size
+IN_layer_size =  3,2,3,5,2
+/
+
+& Neural_input
+IN_input = -0.99,0.141067, -0.54
+/
+
+& Neural_intercepts
+
+  IN_intercepts(1)%vec = -1.67487296,  0.23116423
+  IN_intercepts(2)%vec = -0.78728447,  1.3704431 , -1.95872692
+  IN_intercepts(3)%vec = -0.51424168, -0.12434425, -1.30347236, -0.41169828, -0.44731265
+  IN_intercepts(4)%vec = -0.14167206, -0.11593217, 1.0
+/
