@@ -33,4 +33,5 @@
 
 *.dat
 
-# __pacache_/_
+# python
+ __pacache__/
