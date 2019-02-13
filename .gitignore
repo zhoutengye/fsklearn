@@ -32,3 +32,5 @@
 *.app
 
 *.dat
+
+# __pacache_/_
