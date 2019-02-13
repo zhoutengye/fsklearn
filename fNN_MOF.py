@@ -15,15 +15,14 @@ from sklearn.neural_network import MLPRegressor
 from sk2f import sk2f
 
 # Load Training Date and test data
-f = np.loadtxt('DATA/MOF_Training4.dat',unpack='true')
+f = np.loadtxt('DATA/MOF_Training4.dat', unpack='true')
 
-X = np.transpose(f[0:3,:])
-y = np.transpose(f[4:6,:])
-# to change the range of test data, sinply change the subscripts or import other data.
+X = np.transpose(f[0:3, :])
+y = np.transpose(f[4:6, :])
 n_test = 1
-L = np.zeros((n_test,7))
-X2 = np.transpose(f[0:3,1:2])
-Y3 = np.transpose(f[4:6,1:2])
+L = np.zeros((n_test, 7))
+X2 = np.transpose(f[0:3, 1:2])
+Y3 = np.transpose(f[4:6, 1:2])
 n_test = X2.shape[0]
 
 regr = MLPRegressor(hidden_layer_sizes=(2,3,5), activation='logistic', max_iter=30, alpha=0.0,\
