@@ -1,4 +1,4 @@
-Module FSklearn
+Module mod_fsklearn
 
   integer , parameter :: SP = 8
 
@@ -39,8 +39,6 @@ Module FSklearn
     integer  :: output_len
     integer  :: layers
     integer  , allocatable :: layer_size(:)
-    real(SP) , allocatable :: input(:)
-    real(SP) , allocatable :: output(:)
     type(ragged_vector) , allocatable :: activations(:)
     type(ragged_vector) , allocatable :: intercepts(:)
     type(ragged_matrix) , allocatable :: coefs(:)
@@ -50,11 +48,9 @@ Module FSklearn
     type(NN_activation) :: out_activation
   contains
     ! procedure training  => training_Neural_Network
-    procedure para_read => read_Neural_Network
-    procedure predict   => predict_Neural_Network
+    procedure , nopass :: para_read  => read_Neural_Network
+    procedure , nopass :: predict   => predict_Neural_Network
   end type Neural_Network
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  !-----------End Neural Networks variables---------------
 
   
   !---------------Decision tree  variables----------------
@@ -72,25 +68,73 @@ Module FSklearn
     integer :: n_inputs
     integer :: n_outputs
     integer :: max_depth
-    real(SP), allocatable :: input(:)
-    real(SP), allocatable :: output(:)
     type(Nodes), allocatable :: node(:)
   contains
-    procedure para_read => read_Decision_Tree
-    procedure predict => predict_Decision_Tree
+    procedure , nopass :: para_read => read_Decision_Tree
+    procedure , nopass :: predict => predict_Decision_Tree
   end type Decision_Tree
   !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
   !-----------End Decision tree  variables----------------
 
+  type(Neural_Network) :: nn
+  type(Decision_Tree) :: dt
+
+  type :: fsklearn_define
+    character(20) :: training_type
+    integer :: n_inputs
+    integer :: n_outputs
+    real(SP), allocatable :: input(:)
+    real(SP), allocatable :: output(:)
+    procedure(choose_read), pointer, nopass :: para_read =>NULL()
+    procedure(choose_predict), pointer, nopass :: predict =>NULL()
+  end type fsklearn_define
+
+  interface
+    function choose_predict(input,n_input,n_output)
+      import sp
+      integer :: n_input
+      integer :: n_output
+      real(SP) :: input(n_input)
+      real(SP) :: choose_predict(n_output) 
+    end function choose_predict
+  end interface
+
+  interface
+    subroutine choose_read
+    end subroutine choose_read
+  end interface
+
+  type(fsklearn_define) :: fsklearn
+
 contains
 
-  subroutine read_Neural_Network(NN)
+  subroutine fsklearn_predict_initialization
+
+    implicit none
+
+    if ( trim(fsklearn%training_type) .eq. 'Neural_Network' ) then
+      call nn%para_read
+      fsklearn%predict => predict_Neural_Network
+      fsklearn%n_inputs = nn%input_len
+      fsklearn%n_outputs = nn%output_len
+    elseif ( trim(fsklearn%training_type) .eq. 'Decision_Tree' ) then
+      call dt%para_read
+      fsklearn%predict => predict_Decision_Tree
+      fsklearn%n_inputs = dt%n_inputs
+      fsklearn%n_outputs = dt%n_outputs
+    else
+      write(*,*) 'wrong training type!'
+    end if
+
+  end subroutine fsklearn_predict_initialization
+
+
+  subroutine read_Neural_Network
     implicit none
 
     integer :: i,j
     integer :: error
     character(len=20) :: string
-    class(Neural_Network) :: NN
 
     character :: activation
     character :: out_activation
@@ -105,9 +149,7 @@ contains
     read(81,*,iostat=error) string
     read(81,*) NN%layer_size
     NN%input_len = NN%layer_size(1)
-    NN%output_len = NN%layer_size(NN.layers)
-    allocate(NN%input(NN%input_len))
-    allocate(NN%output(NN%output_len))
+    NN%output_len = NN%layer_size(NN%layers)
 
 
     allocate(NN%activations(NN%layers))
@@ -121,7 +163,7 @@ contains
       allocate(NN%intercepts(i)%vec(NN%layer_size(i+1)))
       read(81,*) NN%intercepts(i)%vec
     end do
-    nn%activations(1)%vec=NN%input
+
 
     read(81,*,iostat=error) string
     allocate(NN%coefs(NN%layers-1))
@@ -168,9 +210,8 @@ contains
 
   end subroutine read_Neural_Network
 
-  subroutine read_Decision_Tree(DT)
+  subroutine read_Decision_Tree
     implicit none 
-    class(Decision_Tree) :: DT
     integer :: i,j
     integer :: error
     character(len=20) :: string
@@ -185,8 +226,6 @@ contains
     read(82,*,iostat=error) string
     read(82,*) DT%max_depth
 
-    allocate(DT%input(DT%n_inputs))
-    allocate(DT%output(DT%n_outputs))
     allocate(DT%node(DT%node_count))
 
     do i = 1,DT%node_count
@@ -201,34 +240,31 @@ contains
 
   end subroutine read_Decision_Tree
 
-  function predict_Neural_Network(NN,input,n_input,n_output)
-    implicit none
-    class(Neural_Network) :: NN
+  function predict_Neural_Network(input,n_input,n_output)
+    implicit none    
     integer :: n_input
     integer :: n_output
     real(SP) :: input(n_input)
     real(SP) :: predict_Neural_Network(n_output) 
     integer :: i
 
-    NN%input = input
-    NN%activations(1)%vec = NN%input
+    NN%activations(1)%vec = input
 
     do i = 1, NN%layers-2
       NN%activations(i+1)%vec = matmul(NN%coefs(i)%mat,NN%activations(i)%vec) + NN%intercepts(i)%vec
-      NN%activations(i+1).vec =NN%activation%activate(NN%layer_size(i+1),NN%activations(i+1)%vec)
-      write(*,*) NN%activations(i+1)%vec
+      NN%activations(i+1)%vec =NN%activation%activate(NN%layer_size(i+1),NN%activations(i+1)%vec)
     end do
-    NN%activations(NN.layers)%vec = matmul(NN%coefs(NN.layers-1)%mat,NN%activations(NN.layers-1)%vec) + NN%intercepts(NN.layers-1)%vec
-    NN%activations(NN.layers)%vec =  NN%out_activation%activate(nn%output_len,NN%activations(NN%layers)%vec)
-    NN%output = NN%activations(NN.layers)%vec
+    NN%activations(NN%layers)%vec = &
+        matmul(NN%coefs(NN%layers-1)%mat,NN%activations(NN%layers-1)%vec) + NN%intercepts(NN%layers-1)%vec
+    NN%activations(NN%layers)%vec = &
+    NN%out_activation%activate(nn%output_len,NN%activations(NN%layers)%vec)
 
-    predict_Neural_Network = NN%output
+    predict_Neural_Network = NN%activations(NN%layers)%vec
 
   end function predict_Neural_Network
 
-  function predict_Decision_Tree(DT,input,n_input,n_output)
+  function predict_Decision_Tree(input,n_input,n_output)
     implicit none
-    class(Decision_Tree) :: DT
     integer :: n_input
     integer :: n_output
     real(SP) :: input(n_input)
@@ -289,5 +325,5 @@ contains
     activation_softmax = 1.0 / (1.0+exp(-X))
   end function activation_softmax
 
-end Module FSklearn
+end Module mod_fsklearn
 
