@@ -31,21 +31,28 @@ regr = MLPRegressor(hidden_layer_sizes=(2,3,5), activation='logistic', max_iter=
 
 dt = DecisionTreeRegressor()
 
+rf = RandomForestRegressor()
+
 regr.fit(X,y)
 dt.fit(X,y)
+rf.fit(X,y)
 y2 = regr.predict(X2) 
 y2dt = dt.predict(X2)
+y2rf = rf.predict(X2)
 
 print(X2)
 print(y2)
 print(y2dt)
+print(y2rf)
 print(Y3)
 
 regr.type = 'neural_network'
 dt.type   = 'decision_tree'
+rf.type   = 'random_forest'
 
 sk2f(regr)
 sk2f(dt)
+sk2f(rf)
 
 
 

@@ -1,7 +1,10 @@
 Module mod_fsklearn
 
-  integer , parameter :: SP = 8
-
+# if defined(Double_Presion) 
+  integer , private, parameter :: SP = 8
+# else
+integer , private, parameter :: SP = 4  
+# endif
   !---------------ragged---------------
   ! ragged vectors for 2-D array consists of vectors with different length
   type ragged_vector
@@ -52,7 +55,6 @@ Module mod_fsklearn
     procedure , nopass :: predict   => predict_Neural_Network
   end type Neural_Network
 
-  
   !---------------Decision tree  variables----------------
   !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
   Type Nodes
@@ -73,29 +75,46 @@ Module mod_fsklearn
     procedure , nopass :: para_read => read_Decision_Tree
     procedure , nopass :: predict => predict_Decision_Tree
   end type Decision_Tree
+  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||=>NULL()
+  !-----------End Decision tree  variables----------------=>NULL()
+  
+  !---------------Random forest variables-----------------
   !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  !-----------End Decision tree  variables----------------
-
+  Type:: Random_Forest
+    integer :: tree_count
+    integer :: n_inputs
+    integer :: n_outputs
+    type(Decision_Tree), allocatable :: trees(:)
+  contains
+    procedure , nopass :: para_read => read_Random_Forest
+    procedure , nopass :: predict => predict_Random_Forest
+  end type Random_Forest
+  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  !-----------End Random forest variables-----------------
+  
   type(Neural_Network) :: nn
   type(Decision_Tree) :: dt
+  type(Random_Forest) :: rf
 
   type :: fsklearn_define
     character(20) :: training_type
     integer :: n_inputs
     integer :: n_outputs
-    real(SP), allocatable :: input(:)
-    real(SP), allocatable :: output(:)
+    real(SP), allocatable :: inputs(:)
+    real(SP), allocatable :: outputs(:)
     procedure(choose_read), pointer, nopass :: para_read =>NULL()
     procedure(choose_predict), pointer, nopass :: predict =>NULL()
   end type fsklearn_define
 
   interface
-    function choose_predict(input,n_input,n_output)
+
+  function choose_predict(input,n_input,n_output)
       import sp
+      implicit none
       integer :: n_input
       integer :: n_output
       real(SP) :: input(n_input)
-      real(SP) :: choose_predict(n_output) 
+      real(SP) :: choose_predict(n_output)
     end function choose_predict
   end interface
 
@@ -108,25 +127,42 @@ Module mod_fsklearn
 
 contains
 
-  subroutine fsklearn_predict_initialization
+  subroutine fsklearn_initialization
 
     implicit none
 
+    character(20) :: training_type
+    integer :: n_inputs
+    integer :: n_outputs
+
+    open(79,file ='test.namelist')
+
+    namelist /sizes/ n_inputs, n_outputs
+    namelist /train_type/ training_type
+
+    Read(79,nml=sizes) 
+    Read(79,nml=train_type) 
+
+    fsklearn%training_type = training_type
+    fsklearn%n_inputs  = n_inputs
+    fsklearn%n_outputs = n_outputs
+
     if ( trim(fsklearn%training_type) .eq. 'Neural_Network' ) then
-      call nn%para_read
+      fsklearn%para_read => read_Neural_Network
       fsklearn%predict => predict_Neural_Network
-      fsklearn%n_inputs = nn%input_len
-      fsklearn%n_outputs = nn%output_len
     elseif ( trim(fsklearn%training_type) .eq. 'Decision_Tree' ) then
-      call dt%para_read
+      fsklearn%para_read => read_Decision_Tree
       fsklearn%predict => predict_Decision_Tree
-      fsklearn%n_inputs = dt%n_inputs
-      fsklearn%n_outputs = dt%n_outputs
+    elseif ( trim(fsklearn%training_type) .eq. 'Random_Forest' ) then
+      fsklearn%para_read => read_Random_Forest
+      fsklearn%predict => predict_Random_Forest
     else
       write(*,*) 'wrong training type!'
     end if
 
-  end subroutine fsklearn_predict_initialization
+    call fsklearn%para_read
+
+  end subroutine fsklearn_initialization
 
 
   subroutine read_Neural_Network
@@ -179,6 +215,8 @@ contains
     read(81,*) NN%activation_type
     read(81,*,iostat=error) string
     read(81,*) NN%out_activation_type
+
+    close(81)
 
     if (trim(NN%activation_type).eq.'logistic') then
       NN%activation%activate => activation_logistic
@@ -238,7 +276,52 @@ contains
       read(82,*) DT%node(i)%values
     end do
 
+    close(82)
+
   end subroutine read_Decision_Tree
+
+  subroutine read_Random_Forest
+    implicit none
+    integer :: i,j
+    integer :: error
+    character(len=20) :: string
+    type(Decision_Tree) :: tree1
+
+    open(83,file='rf_output.dat',status='unknown')
+    read(83,*,iostat=error) string
+    read(83,*) RF%tree_count
+
+    allocate(RF%trees(RF%tree_count))
+
+    do j = 1, RF%tree_count
+      read(83,*,iostat=error) string
+      read(83,*) RF%trees(j)%node_count
+      read(83,*,iostat=error) string
+      read(83,*) RF%trees(j)%n_inputs
+      read(83,*,iostat=error) string
+      read(83,*) RF%trees(j)%n_outputs
+      read(83,*,iostat=error) string
+      read(83,*) RF%trees(j)%max_depth
+
+      allocate(RF%trees(j)%node(RF%trees(j)%node_count))
+
+      do i = 1,RF%trees(j)%node_count
+        allocate(RF%trees(j)%node(i)%values(RF%trees(j)%n_outputs))
+        read(83,*,iostat=error) string
+        read(83,*) RF%trees(j)%node(i)%children_left
+        read(83,*) RF%trees(j)%node(i)%children_right
+        read(83,*) RF%trees(j)%node(i)%feature
+        read(83,*) RF%trees(j)%node(i)%threshold
+        read(83,*) RF%trees(j)%node(i)%values
+      end do
+    end do
+
+    RF%n_inputs  = RF%trees(1)%n_inputs
+    RF%n_outputs = RF%trees(1)%n_outputs
+
+    close(83)
+
+  end subroutine read_Random_Forest
 
   function predict_Neural_Network(input,n_input,n_output)
     implicit none    
@@ -285,6 +368,33 @@ contains
     predict_Decision_Tree = DT%node(n)%values
 
   end function predict_Decision_Tree
+  
+  function predict_Random_Forest(input,n_input,n_output)
+    implicit none
+    integer :: n_input
+    integer :: n_output
+    real(SP) :: input(n_input)
+    real(SP) :: predict_Random_Forest(n_output)
+
+    integer :: i, j, n
+
+    predict_Random_Forest = 0.0_SP
+    do j = 1, RF%tree_count
+      n=1
+      do i = 1, RF%trees(j)%max_depth
+        if (RF%trees(j)%node(n)%feature .eq. -1) Exit
+        if (input(RF%trees(j)%node(n)%feature) .le. RF%trees(j)%node(n)%threshold) then
+          n = RF%trees(j)%node(n)%children_left
+        else
+          n = RF%trees(j)%node(n)%children_right
+        end if
+      end do
+      predict_Random_Forest = predict_Random_Forest + RF%trees(j)%node(n)%values
+    end do
+
+    predict_Random_Forest = predict_Random_Forest / RF%tree_count
+
+  end function predict_Random_Forest
 
   function activation_logistic(n,X)
     integer, intent(in) :: n

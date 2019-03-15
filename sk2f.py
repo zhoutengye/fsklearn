@@ -1,6 +1,8 @@
 def sk2f(write_paras):
     if (write_paras.type == 'neural_network'):
         nn_sk2f(write_paras)
+    if (write_paras.type == 'random_forest'):
+        rf_sk2f(write_paras)
     elif (write_paras.type == 'decision_tree'):
         dt_sk2f(write_paras)
 
@@ -41,7 +43,7 @@ def nn_sk2f(ml):
     nn_output.write('\n')
 
 def dt_sk2f(dt):
-    
+
     dt_output = open('dt_output.dat','w')
 
     dt_output.write('! node_count\n')
@@ -63,5 +65,34 @@ def dt_sk2f(dt):
             dt_output.write('%f '%dt.tree_.value[i,j])
         dt_output.write('\n')
 
+def rf_sk2f(rf):
+
+    rf_output = open('rf_output.dat','w')
+
+    rf_output.write('! tree_count\n')
+    rf_output.write('%d\n'%len(rf.estimators_))
+
+    trees = rf.estimators_
+
+    for j in range(len(rf.estimators_)):
+        tree1 = trees[j].tree_
+        rf_output.write('! node_count\n')
+        rf_output.write('%d\n'%tree1.node_count)
+        rf_output.write('! n_features\n')
+        rf_output.write('%d\n'%tree1.n_features)
+        rf_output.write('! n_outputs\n')
+        rf_output.write('%d\n'%tree1.n_outputs)
+        rf_output.write('! max_depth\n')
+        rf_output.write('%d\n'%tree1.max_depth)
+
+        for i in range(tree1.node_count):
+            rf_output.write('! node %d\n'%(i+1))
+            rf_output.write('%d\n'%(tree1.children_left[i]+1))
+            rf_output.write('%d\n'%(tree1.children_right[i]+1))
+            rf_output.write('%d\n'%(tree1.feature[i]+1))
+            rf_output.write('%f\n'%tree1.threshold[i])
+            for j in range(tree1.n_outputs):
+                rf_output.write('%f '%tree1.value[i,j])
+            rf_output.write('\n')
 
 import numpy as np
