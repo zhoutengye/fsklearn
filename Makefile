@@ -12,12 +12,12 @@
   FLAG_2 = -DMETHOD_ONE
   # FLAG_2 = -DMETHOD_TWO
   FLAG_3 = -DGEN_TRAINING
-  # FLAG_2 = -DMETHOD_TWO
+  FLAG_4 = -DTRAINING
 
 #--------------------fortran compiler and flags----------------------------
   CPP      = /usr/bin/cpp 
   CPPFLAGS = -P -traditional 
-  CPPARGS  = $(CPPFLAGS) $(FLAG_1) $(FLAG_2)
+  CPPARGS  = $(CPPFLAGS) $(FLAG_1) $(FLAG_2) $(FLAG_3) $(FLAG_4) $(FLAG_5) 
   
   FC       = ifort
   OPT      = -fast
