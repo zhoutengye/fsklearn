@@ -1,21 +1,48 @@
+
+
 # fsklearn
-A FORTRAN interface to scikit-learn library. 
-Training with Python and predict in Fortran.
 
-## Motivations
-Python has been widely used in machine learning areas. 
-However, there is few Fortran package for machine learning machine learning. 
-While many scientific computational code are peogrammed with FORTRAN. wrapping the existing machine learning library to the FORTRAN will bring the FORTRAN model more power without doing too much extra work.
-One can call Python from system call or from embedding Python in C in Fortran. 
-However, the former way bring much more extra CPU cost and the later may be a nightmire for working among Python, C and Fortran.
-Or one may consider about compiling Fortran code as a Python code via f2py. 
-Personally I think it would be fine for smaller Fortran projects, but for larger Fortran projects, 
-again, it would be a nightmire.
+A simple module for machine learning in Fortran using [scikit-learn](https://github.com/scikit-learn/scikit-learn). 
 
-In most cases, 
-we only need to do the training before the start of the simulation, 
-and the coefficients can be used to predict some variables in the computational model. 
-An alternative painless way of wrapping between Python and Fortran is to come up with simple Python code for training and save the coefficients to a data file. 
-Then a Fortran module will read the coefficients from the data file at the beginning and predict the results.
-The prediction part is much simplier than the training part for programming.
+## Overview
 
+Currently the module can be used to do training and prediction in FORTRAN. 
+
+The training part uses [scikit-learn](https://github.com/scikit-learn/scikit-learn) library by calling Python from FORTRAN. 
+
+The prediction part, as it may be called frequent by a FORTRAN code, is written with FORTRAN. 
+
+
+## Supported machine learning method
+Currently, the following methods are supported for
+**regression** (not classification) problem:
+
+* Neual Networks
+* Decision Tree
+* Random Forest
+
+## Compile the code
+### Supported FORTRAN compiler
+* Intel - Tested with 2019.0.2.187
+* GNU - Tested with 8.1.0
+
+### Required packages for **Python3**
+* [scikit-learn](https://github.com/scikit-learn/scikit-learn)
+* json
+
+### Compile the code
+Some pre-processor directives are used in the code. To build the code, 
+* [FoBis.py](https://github.com/szaghi/FoBiS) - The web framework used
+* Makefile
+
+## Example
+
+```fortran
+program main
+implicit none
+waiting to be added
+end program main
+```
+## License
+
+This project is licensed under the BSD3 - see the [LICENSE.md](LICENSE.md) file for details

@@ -31,9 +31,12 @@
 *.exe
 *.out
 *.app
+test
 
 *.dat
 
 # python
 __pycache__/
 *.py[cod]
+
+*.heritage
