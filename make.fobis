@@ -1,0 +1,65 @@
+[modes]
+modes = gnu   gnu-debug   gnu-mpi
+        intel intel-debug intel-mpi
+
+[common-variables]
+# $FLAG_1 = -DDOUBLE_PRECISION 
+# $FLAG_2 = -DPARALLEL
+$FLAG_4 = -DFSKLEARN_TRAINING
+$FLAG_5 = -DFSKLEARN_PREDICT
+
+$MOD_FILE     = test_fsklearn.f90
+$FORD_FILE    = json-fortran.md
+$STATIC_LIB   = libjsonfortran.a
+$SHARED_LIB   = libjsonfortran.so
+$OPTIMIZE     = -O3
+$CGNU        = -c -fbacktrace -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-function -pedantic -std=f2008ts
+$CGNU_MPI    = 
+$CGNU_DEBUG  = -O0 -g3 -Warray-bounds -Wcharacter-truncation -Wline-truncation -Wimplicit-interface -Wimplicit-procedure -Wunderflow -fcheck=all -fmodule-private -ffree-line-length-132 -fimplicit-none -fbacktrace -fdump-core -finit-real=nan -std=f2008ts -fall-intrinsics
+$CINTEL = -c 
+$CSTATIC_MPIINT  = -c -cpp
+$DEBUG_INT    = -O0 -debug all -check all -warn all -extend-source 132 -traceback -gen-interfaces -fpe-all=0 -fp-stack-check -fstack-protector-all -ftrapuv -no-ftz -std15
+
+# modes templates
+[template-general]
+cflags_heritage = True
+build_dir       = ./
+mod_dir         = ./mod/
+obj_dir         = ./obj/
+src             = ./src/
+colors          = True
+quiet           = False
+log             = False
+jobs            = 2
+mklib           = static
+target          = $MOD_FILE
+output          = test
+preproc = -fpp $FLAG_1 $FLAG_2 $FLAG_3 $FLAG_4 $FLAG_5
+exclude_dirs    = $EXCLUDE_DIRS
+
+# library
+[gnu]
+description     = Build library with GNU gfortran by optimized-static flags
+compiler        = gnu
+cflags          = $CGNU $OPTIMIZE
+template        = template-general
+
+[gnu-debug]
+description     = Build library with GNU gfortran by debug-static flags
+compiler        = gnu
+cflags          = $CGNU_DEBUG $DEBUG_GNU
+template        = template-general
+
+[intel]
+description     = Build library with Intel Fortran by optimized-static flags
+compiler        = intel
+cflags          = $CINTEL $OPTIMIZE
+template        = template-general
+
+
+[intel-debug]
+description     = Build library with Intel Fortran by debug-static flags
+compiler        = intel
+cflags          = $CINTEL_DEBUG $DEBUG_INT
+template        = template-general
+
