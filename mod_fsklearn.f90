@@ -1,166 +1,259 @@
-Module mod_fsklearn
+Module Mod_Fsklearn
 
-# if defined(Double_Presion) 
-  integer , private, parameter :: SP = 8
+  ! Subject to the choice of precision.
+  ! Single precision by default
+# if defined(DOUBLE_PRECISION)
+  Integer, Private, Parameter :: PS = 8
 # else
-integer , private, parameter :: SP = 4  
+  Integer, Private, Parameter :: PS = 4
 # endif
-  !---------------ragged---------------
-  ! ragged vectors for 2-D array consists of vectors with different length
-  type ragged_vector
-    real(SP),allocatable::vec(:)
-  end type ragged_vector
 
-  ! ragged array for 3-D array consists of 2-D matrices with difference size
-  type ragged_matrix
-    real(SP),allocatable::mat(:,:)
-  end type ragged_matrix
-
-  !---------------Neural Networks variables---------------
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Ragged vector and array ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   !
-  ! NN_activation used to choose activation function 
-  ! at the beginning.
-  ! Neural_Network for choosing 
-  type :: NN_activation
-    procedure(sub_interface), pointer, nopass :: activate =>NULL()
-  end type NN_activation
+  ! Declearation of ragged vector and ragged matrix
+  ! Used to build neural nwtworks in this case
+  !
+  ! Ragged vectors for 2-D array consists of vectors with
+  !   different length
+  ! Ragged vectors for 3-D array consists of matrice with
+  !   different sized
+
+  Type Ragged_Vector
+    Real(PS), Allocatable :: Vec(:)
+  End Type Ragged_vector
+  Type Ragged_Matrix
+    Real(PS), Allocatable :: Mat(:,:)
+  End Type Ragged_Matrix
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Ragged vector and array ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Neural Networks variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !
+  ! NN_activation used to choose activation function
+  !     at the beginning.
+  ! Neural_Network for choosing
+  Type :: NN_activation
+    Procedure(Sub_Interface), Pointer, NoPass :: &
+                                   Activate =>NULL()
+  End Type NN_activation
 
   ! interface for choose activation type
-  interface
-    function sub_interface(n, x)
-      import :: SP
-      integer, intent(in) :: n
-      real(SP), intent(in), dimension(n) :: x
-      real(SP), dimension(n) :: sub_interface
-    end function sub_interface
-  end interface
+  Interface
+    Function Sub_Interface(n, x)
+      Import :: PS
+      Integer,  Intent(in) :: n
+      Real(PS), Intent(in), Dimension(n) :: x
+      Real(PS), Dimension(n) :: Sub_Interface
+    End Function Sub_Interface
+  End Interface
 
   ! neural network parameters
-  type :: Neural_Network
-    integer  :: input_len
-    integer  :: output_len
-    integer  :: layers
-    integer  , allocatable :: layer_size(:)
-    type(ragged_vector) , allocatable :: activations(:)
-    type(ragged_vector) , allocatable :: intercepts(:)
-    type(ragged_matrix) , allocatable :: coefs(:)
-    character(10) :: activation_type
-    character(10) :: out_activation_type
-    type(NN_activation) :: activation
-    type(NN_activation) :: out_activation
-  contains
+  Type :: Neural_Network
+    Integer :: input_len
+    Integer :: output_len
+    Integer :: layers
+    Integer, Allocatable :: Layer_Size(:)
+    Type(Ragged_Vector), Allocatable :: Activations(:)
+    Type(Ragged_Vector), Allocatable :: Intercepts(:)
+    Type(Ragged_Matrix), Allocatable :: Coefs(:)
+    Character(10) :: activation_type
+    Character(10) :: out_activation_type
+    Type(NN_Activation) :: Activation
+    Type(NN_Activation) :: Out_Activation
+  Contains
     ! procedure training  => training_Neural_Network
-    procedure , nopass :: para_read  => read_Neural_Network
-    procedure , nopass :: predict   => predict_Neural_Network
-  end type Neural_Network
+    Procedure , Nopass :: Para_read => Read_Neural_Network
+    Procedure , Nopass :: Predict   => Predict_Neural_Network
+  End Type Neural_Network
 
-  !---------------Decision tree  variables----------------
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Neural Network Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Decision Tree Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   Type Nodes
-    integer :: children_left
-    Integer :: children_right
-    Integer :: feature
-    Real(SP) :: threshold
-    Real(SP), allocatable :: values(:)
-  end type Nodes
+    Integer  :: children_left
+    Integer  :: children_right
+    Integer  :: feature
+    Real(PS) :: threshold
+    Real(PS), Allocatable :: Values(:)
+  End Type Nodes
 
   Type:: Decision_Tree
-    integer :: node_count
-    integer :: n_inputs
-    integer :: n_outputs
-    integer :: max_depth
-    type(Nodes), allocatable :: node(:)
-  contains
-    procedure , nopass :: para_read => read_Decision_Tree
-    procedure , nopass :: predict => predict_Decision_Tree
-  end type Decision_Tree
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||=>NULL()
-  !-----------End Decision tree  variables----------------=>NULL()
-  
-  !---------------Random forest variables-----------------
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    Integer :: node_count
+    Integer :: n_inputs
+    Integer :: n_outputs
+    Integer :: max_depth
+    Type(Nodes), allocatable :: Node(:)
+  Contains
+    Procedure , nopass :: Para_Read => Read_Decision_Tree
+    Procedure , Nopass :: Predict => Predict_Decision_Tree
+  End Type Decision_Tree
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Decision Tree Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Random Forest Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   Type:: Random_Forest
-    integer :: tree_count
-    integer :: n_inputs
-    integer :: n_outputs
-    type(Decision_Tree), allocatable :: trees(:)
-  contains
-    procedure , nopass :: para_read => read_Random_Forest
-    procedure , nopass :: predict => predict_Random_Forest
-  end type Random_Forest
-  !|||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  !-----------End Random forest variables-----------------
-  
-  type(Neural_Network) :: nn
-  type(Decision_Tree) :: dt
-  type(Random_Forest) :: rf
+    Integer :: tree_count
+    Integer :: n_inputs
+    Integer :: n_outputs
+    Type(Decision_Tree), allocatable :: Trees(:)
+  Contains
+    Procedure , NoPass :: Para_Read => Read_Random_Forest
+    Procedure , NoPass :: Predict => Predict_Random_Forest
+  End Type Random_Forest
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Random Forest Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-  type :: fsklearn_define
-    character(20) :: training_type
-    integer :: n_inputs
-    integer :: n_outputs
-    real(SP), allocatable :: inputs(:)
-    real(SP), allocatable :: outputs(:)
-    procedure(choose_read), pointer, nopass :: para_read =>NULL()
-    procedure(choose_predict), pointer, nopass :: predict =>NULL()
-  end type fsklearn_define
 
-  interface
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Fsklearn Type Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  Type :: Fsklearn_Define
+    Character(20) :: training_type
+    Integer :: n_inputs
+    Integer :: n_outputs
+    Real(PS), Allocatable :: Inputs(:)
+    Real(PS), Allocatable :: Outputs(:)
+    Procedure(Choose_Read),    Pointer, NoPass :: Para_Read => NULL()
+    Procedure(Choose_Predict), Pointer, NoPass :: Predict => NULL()
+  Contains
+    Procedure, Nopass :: Gen_Training => Generate_Training_Data
+    Procedure, Nopass :: Initialization => fsklearn_Initialization
+  End Type Fsklearn_Define
 
-  function choose_predict(input,n_input,n_output)
-      import sp
-      implicit none
-      integer :: n_input
-      integer :: n_output
-      real(SP) :: input(n_input)
-      real(SP) :: choose_predict(n_output)
-    end function choose_predict
-  end interface
+  Interface
+    Function Choose_Predict(input, n_input, n_output)
+      Import PS
+      Implicit None
+      Integer  :: n_input
+      Integer  :: n_output
+      Real(PS) :: Input(n_input)
+      Real(PS) :: Choose_Predict(n_output)
+    End Function Choose_Predict
+  End Interface
 
-  interface
-    subroutine choose_read
-    end subroutine choose_read
-  end interface
+  Interface
+    Subroutine Choose_read
+    End Subroutine Choose_read
+  End Interface
 
-  type(fsklearn_define) :: fsklearn
+  ! Interface for the write line function
+  !    dealing with different data type
+  Interface Write_Line
+    Module Procedure Write_Line_Integer
+    Module Procedure Write_Line_Real
+  End Interface Write_Line
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-contains
 
-  subroutine fsklearn_initialization
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !
+  ! Files associate with Fsklearn. If not set, the path
+  ! of the training data and the training parameters
+  ! will be "fsklearn_data" and "fsklearn_para" respectively
+  ! in the current directory by default.
+  !
+  ! "training_data_path":
+  !    - the path for training datas
+  ! "training_input_name":
+  !    - File name for input data
+  !    - Located in the path "training_data_path"
+  !    - The length of the data in each row is n_inputs
+  !    - If mpi with N processot is defined, there will be
+  !         N input files, then all files will be gathered
+  !         automatically by the Python code.
+  ! "training_output_name":
+  !    - Located in the path "training_data_path"
+  !    - file name for put put data
+  !    - The length of the data in each row is n_outputs
+  !         N input files, then all files will be gathered
+  !         automatically by the Python code.
+  ! "":
+  !    - the path for training datas
+  ! "set_ML_file":
+  !    - File name for ata
+  !    - Located in the path "training_data_path"
+
+  Character(50) :: training_data_path
+  Character(50) :: para_files_path
+  Character(50) :: f2py_training_param
+  Character(50) :: set_ML_file
+  Character(50) :: traing_input_name
+  Character(50) :: traing_output_name
+  Character(50) :: nn_param_name
+  Character(50) :: dt_param_name
+  Character(50) :: rf_param_name
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓End Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
+
+  ! Predefined type variables.
+  ! One may use one's own decleration
+  Type(Neural_Network) :: N_Work
+  Type(Decision_Tree) :: D_Tree
+  Type(Random_Forest) :: R_Forest
+  Type(Fsklearn_Define) :: F_Sklearn
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓Customized variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !
+  ! some variables specificially for the object model,
+  ! for example, some variables used for calculating the
+  ! input and output vectors.
+  !
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+Contains
+
+  Subroutine Fsklearn_Initialization
 
     implicit none
 
     character(20) :: training_type
     integer :: n_inputs
     integer :: n_outputs
-
-    open(79,file ='test.namelist')
+    CHARACTER(LEN=80)::TMP_NAME
+    CHARACTER(LEN=80):: str_id
 
     namelist /sizes/ n_inputs, n_outputs
     namelist /train_type/ training_type
 
-    Read(79,nml=sizes) 
-    Read(79,nml=train_type) 
+    TMP_NAME = trim(adjustl(para_files_path))// &
+        trim(adjustl(f2py_training_param))
+    open(78,file = TMP_NAME)
+    TMP_NAME = trim(adjustl(para_files_path))// &
+        trim(adjustl(set_ML_file))
+    open(79,file = TMP_NAME)
 
-    fsklearn%training_type = training_type
-    fsklearn%n_inputs  = n_inputs
-    fsklearn%n_outputs = n_outputs
+    Read(79,nml=sizes)
+    Read(79,nml=train_type)
 
-    if ( trim(fsklearn%training_type) .eq. 'Neural_Network' ) then
-      fsklearn%para_read => read_Neural_Network
-      fsklearn%predict => predict_Neural_Network
-    elseif ( trim(fsklearn%training_type) .eq. 'Decision_Tree' ) then
-      fsklearn%para_read => read_Decision_Tree
-      fsklearn%predict => predict_Decision_Tree
-    elseif ( trim(fsklearn%training_type) .eq. 'Random_Forest' ) then
-      fsklearn%para_read => read_Random_Forest
-      fsklearn%predict => predict_Random_Forest
+    training_data_path = ''
+    para_files_path ='fsklearn_ML/'
+    f2py_training_param = 'training_param.json'
+    set_ML_file = 'fsklearn_param.namelist'
+    traing_input_name = 'training_input'
+    traing_output_name = 'training_output'
+    nn_param_name = 'nn_param.dat'
+    dt_param_name = 'dt_param.dat'
+    rf_param_name = 'rf_param.dat'
+
+    F_Sklearn%training_type = training_type
+    F_Sklearn%n_inputs  = n_inputs
+    F_Sklearn%n_outputs = n_outputs
+
+
+    if ( trim(F_Sklearn%training_type) .eq. 'Neural_Network' ) then
+      F_Sklearn%para_read => read_Neural_Network
+      F_Sklearn%predict => predict_Neural_Network
+    elseif ( trim(F_Sklearn%training_type) .eq. 'Decision_Tree' ) then
+      F_Sklearn%para_read => read_Decision_Tree
+      F_Sklearn%predict => predict_Decision_Tree
+    elseif ( trim(F_Sklearn%training_type) .eq. 'Random_Forest' ) then
+      F_Sklearn%para_read => read_Random_Forest
+      F_Sklearn%predict => predict_Random_Forest
     else
       write(*,*) 'wrong training type!'
     end if
 
-    call fsklearn%para_read
+    call F_Sklearn%para_read
 
   end subroutine fsklearn_initialization
 
@@ -178,70 +271,70 @@ contains
     open(81,file='nn_output.dat',status='unknown')
 
     read(81,*,iostat=error) string
-    read(81,*) NN%layers
-    allocate(NN%layer_size(NN%layers))
+    read(81,*) N_Work%layers
+    allocate(N_Work%layer_size(N_Work%layers))
 
     ! read 
     read(81,*,iostat=error) string
-    read(81,*) NN%layer_size
-    NN%input_len = NN%layer_size(1)
-    NN%output_len = NN%layer_size(NN%layers)
+    read(81,*) N_Work%layer_size
+    N_Work%input_len = N_Work%layer_size(1)
+    N_Work%output_len = N_Work%layer_size(N_Work%layers)
 
 
-    allocate(NN%activations(NN%layers))
-    do i = 1,NN%layers
-      allocate(NN%activations(i)%vec(NN%layer_size(i)))
+    allocate(N_Work%activations(N_Work%layers))
+    do i = 1,N_Work%layers
+      allocate(N_Work%activations(i)%vec(N_Work%layer_size(i)))
     end do
 
     read(81,*,iostat=error) string
-    allocate(NN%intercepts(NN%layers-1))
-    do i = 1,NN%layers-1
-      allocate(NN%intercepts(i)%vec(NN%layer_size(i+1)))
-      read(81,*) NN%intercepts(i)%vec
+    allocate(N_Work%intercepts(N_Work%layers-1))
+    do i = 1,N_Work%layers-1
+      allocate(N_Work%intercepts(i)%vec(N_Work%layer_size(i+1)))
+      read(81,*) N_Work%intercepts(i)%vec
     end do
 
 
     read(81,*,iostat=error) string
-    allocate(NN%coefs(NN%layers-1))
-    do i = 1,NN%layers-1
-      allocate(NN%coefs(i)%mat(NN%layer_size(i+1),NN%layer_size(i)))
+    allocate(N_Work%coefs(N_Work%layers-1))
+    do i = 1,N_Work%layers-1
+      allocate(N_Work%coefs(i)%mat(N_Work%layer_size(i+1),N_Work%layer_size(i)))
       read(81,*,iostat=error) string
-      do j = 1,NN%layer_size(i+1)
-        read(81,*) NN%coefs(i)%mat(j,:)
+      do j = 1,N_Work%layer_size(i+1)
+        read(81,*) N_Work%coefs(i)%mat(j,:)
       end do
     end do
 
     read(81,*,iostat=error) string
-    read(81,*) NN%activation_type
+    read(81,*) N_Work%activation_type
     read(81,*,iostat=error) string
-    read(81,*) NN%out_activation_type
+    read(81,*) N_Work%out_activation_type
 
     close(81)
 
-    if (trim(NN%activation_type).eq.'logistic') then
-      NN%activation%activate => activation_logistic
-    else if (trim(NN%activation_type).eq.'tanh') then
-      NN%activation%activate => activation_tanh
-    else if (trim(NN%activation_type).eq.'softmax') then
-      NN%activation%activate => activation_softmax
-    else if (trim(NN%activation_type).eq.'relu') then
-      NN%activation%activate => activation_ReLU
-    else if (trim(NN%activation_type).eq.'identity') then
-      NN%activation%activate => activation_identity
+    if (trim(N_Work%activation_type).eq.'logistic') then
+      N_Work%activation%activate => activation_logistic
+    else if (trim(N_Work%activation_type).eq.'tanh') then
+      N_Work%activation%activate => activation_tanh
+    else if (trim(N_Work%activation_type).eq.'softmax') then
+      N_Work%activation%activate => activation_softmax
+    else if (trim(N_Work%activation_type).eq.'relu') then
+      N_Work%activation%activate => activation_ReLU
+    else if (trim(N_Work%activation_type).eq.'identity') then
+      N_Work%activation%activate => activation_identity
     else
       write(*,*) 'invalid activation type'
     end if
 
-    if (trim(NN%out_activation_type).eq.'logistic') then
-      NN%out_activation%activate => activation_logistic
-    else if (trim(NN%out_activation_type).eq.'tanh') then
-      NN%out_activation%activate => activation_tanh
-    else if (trim(NN%out_activation_type).eq.'softmax') then
-      NN%out_activation%activate => activation_softmax
-    else if (trim(NN%out_activation_type).eq.'relu') then
-      NN%out_activation%activate => activation_ReLU
-    else if (trim(NN%out_activation_type).eq.'identity') then
-      NN%out_activation%activate => activation_identity
+    if (trim(N_Work%out_activation_type).eq.'logistic') then
+      N_Work%out_activation%activate => activation_logistic
+    else if (trim(N_Work%out_activation_type).eq.'tanh') then
+      N_Work%out_activation%activate => activation_tanh
+    else if (trim(N_Work%out_activation_type).eq.'softmax') then
+      N_Work%out_activation%activate => activation_softmax
+    else if (trim(N_Work%out_activation_type).eq.'relu') then
+      N_Work%out_activation%activate => activation_ReLU
+    else if (trim(N_Work%out_activation_type).eq.'identity') then
+      N_Work%out_activation%activate => activation_identity
     else
       write(*,*) 'invalid output activation type'
     end if
@@ -256,24 +349,24 @@ contains
 
     open(82,file='dt_output.dat',status='unknown')
     read(82,*,iostat=error) string
-    read(82,*) DT%node_count
+    read(82,*) D_TREE%node_count
     read(82,*,iostat=error) string
-    read(82,*) DT%n_inputs
+    read(82,*) D_TREE%n_inputs
     read(82,*,iostat=error) string
-    read(82,*) DT%n_outputs
+    read(82,*) D_TREE%n_outputs
     read(82,*,iostat=error) string
-    read(82,*) DT%max_depth
+    read(82,*) D_TREE%max_depth
 
-    allocate(DT%node(DT%node_count))
+    allocate(D_TREE%node(D_TREE%node_count))
 
-    do i = 1,DT%node_count
-      allocate(DT%node(i)%values(DT%n_outputs))
+    do i = 1,D_TREE%node_count
+      allocate(D_TREE%node(i)%values(D_TREE%n_outputs))
       read(82,*,iostat=error) string
-      read(82,*) DT%node(i)%children_left
-      read(82,*) DT%node(i)%children_right
-      read(82,*) DT%node(i)%feature
-      read(82,*) DT%node(i)%threshold
-      read(82,*) DT%node(i)%values
+      read(82,*) D_TREE%node(i)%children_left
+      read(82,*) D_TREE%node(i)%children_right
+      read(82,*) D_TREE%node(i)%feature
+      read(82,*) D_TREE%node(i)%threshold
+      read(82,*) D_TREE%node(i)%values
     end do
 
     close(82)
@@ -289,60 +382,60 @@ contains
 
     open(83,file='rf_output.dat',status='unknown')
     read(83,*,iostat=error) string
-    read(83,*) RF%tree_count
+    read(83,*) R_FOREST%tree_count
 
-    allocate(RF%trees(RF%tree_count))
+    allocate(R_FOREST%trees(R_FOREST%tree_count))
 
-    do j = 1, RF%tree_count
+    do j = 1, R_FOREST%tree_count
       read(83,*,iostat=error) string
-      read(83,*) RF%trees(j)%node_count
+      read(83,*) R_FOREST%trees(j)%node_count
       read(83,*,iostat=error) string
-      read(83,*) RF%trees(j)%n_inputs
+      read(83,*) R_FOREST%trees(j)%n_inputs
       read(83,*,iostat=error) string
-      read(83,*) RF%trees(j)%n_outputs
+      read(83,*) R_FOREST%trees(j)%n_outputs
       read(83,*,iostat=error) string
-      read(83,*) RF%trees(j)%max_depth
+      read(83,*) R_FOREST%trees(j)%max_depth
 
-      allocate(RF%trees(j)%node(RF%trees(j)%node_count))
+      allocate(R_FOREST%trees(j)%node(R_FOREST%trees(j)%node_count))
 
-      do i = 1,RF%trees(j)%node_count
-        allocate(RF%trees(j)%node(i)%values(RF%trees(j)%n_outputs))
+      do i = 1,R_FOREST%trees(j)%node_count
+        allocate(R_FOREST%trees(j)%node(i)%values(R_FOREST%trees(j)%n_outputs))
         read(83,*,iostat=error) string
-        read(83,*) RF%trees(j)%node(i)%children_left
-        read(83,*) RF%trees(j)%node(i)%children_right
-        read(83,*) RF%trees(j)%node(i)%feature
-        read(83,*) RF%trees(j)%node(i)%threshold
-        read(83,*) RF%trees(j)%node(i)%values
+        read(83,*) R_FOREST%trees(j)%node(i)%children_left
+        read(83,*) R_FOREST%trees(j)%node(i)%children_right
+        read(83,*) R_FOREST%trees(j)%node(i)%feature
+        read(83,*) R_FOREST%trees(j)%node(i)%threshold
+        read(83,*) R_FOREST%trees(j)%node(i)%values
       end do
     end do
 
-    RF%n_inputs  = RF%trees(1)%n_inputs
-    RF%n_outputs = RF%trees(1)%n_outputs
+    R_FOREST%n_inputs  = R_FOREST%trees(1)%n_inputs
+    R_FOREST%n_outputs = R_FOREST%trees(1)%n_outputs
 
     close(83)
 
   end subroutine read_Random_Forest
 
-  function predict_Neural_Network(input,n_input,n_output)
-    implicit none    
+  function predict_Neural_Network(input, n_input, n_output)
+    implicit none
     integer :: n_input
     integer :: n_output
-    real(SP) :: input(n_input)
-    real(SP) :: predict_Neural_Network(n_output) 
+    real(PS) :: input(n_input)
+    real(PS) :: predict_Neural_Network(n_output) 
     integer :: i
 
-    NN%activations(1)%vec = input
+    N_Work%activations(1)%vec = input
 
-    do i = 1, NN%layers-2
-      NN%activations(i+1)%vec = matmul(NN%coefs(i)%mat,NN%activations(i)%vec) + NN%intercepts(i)%vec
-      NN%activations(i+1)%vec =NN%activation%activate(NN%layer_size(i+1),NN%activations(i+1)%vec)
+    do i = 1, N_Work%layers-2
+      N_Work%activations(i+1)%vec = matmul(N_Work%coefs(i)%mat,N_Work%activations(i)%vec) + N_Work%intercepts(i)%vec
+      N_Work%activations(i+1)%vec =N_Work%activation%activate(N_Work%layer_size(i+1),N_Work%activations(i+1)%vec)
     end do
-    NN%activations(NN%layers)%vec = &
-        matmul(NN%coefs(NN%layers-1)%mat,NN%activations(NN%layers-1)%vec) + NN%intercepts(NN%layers-1)%vec
-    NN%activations(NN%layers)%vec = &
-    NN%out_activation%activate(nn%output_len,NN%activations(NN%layers)%vec)
+    N_Work%activations(N_Work%layers)%vec = &
+        matmul(N_Work%coefs(N_Work%layers-1)%mat,N_Work%activations(N_Work%layers-1)%vec) + N_Work%intercepts(N_Work%layers-1)%vec
+    N_Work%activations(N_Work%layers)%vec = &
+    N_Work%out_activation%activate(N_Work%output_len,N_Work%activations(N_Work%layers)%vec)
 
-    predict_Neural_Network = NN%activations(NN%layers)%vec
+    predict_Neural_Network = N_Work%activations(N_Work%layers)%vec
 
   end function predict_Neural_Network
 
@@ -350,90 +443,129 @@ contains
     implicit none
     integer :: n_input
     integer :: n_output
-    real(SP) :: input(n_input)
-    real(SP) :: predict_Decision_Tree(n_output)
+    real(PS) :: input(n_input)
+    real(PS) :: predict_Decision_Tree(n_output)
 
     integer :: i,n
 
     n = 1
-    do i = 1, DT%max_depth
-      if (DT%node(n)%feature .eq. -1) Exit
-      if (input(DT%node(n)%feature) .le. DT%node(n)%threshold) then
-        n = DT%node(n)%children_left
+    do i = 1, D_TREE%max_depth
+      if (D_TREE%node(n)%feature .eq. -1) Exit
+      if (input(D_TREE%node(n)%feature) .le. D_TREE%node(n)%threshold) then
+        n = D_TREE%node(n)%children_left
       else
-        n = DT%node(n)%children_right
+        n = D_TREE%node(n)%children_right
       end if
     end do
 
-    predict_Decision_Tree = DT%node(n)%values
+    predict_Decision_Tree = D_TREE%node(n)%values
 
   end function predict_Decision_Tree
-  
+
   function predict_Random_Forest(input,n_input,n_output)
     implicit none
     integer :: n_input
     integer :: n_output
-    real(SP) :: input(n_input)
-    real(SP) :: predict_Random_Forest(n_output)
+    real(PS) :: input(n_input)
+    real(PS) :: predict_Random_Forest(n_output)
 
     integer :: i, j, n
 
-    predict_Random_Forest = 0.0_SP
-    do j = 1, RF%tree_count
+    predict_Random_Forest = 0.0_PS
+    do j = 1, R_FOREST%tree_count
       n=1
-      do i = 1, RF%trees(j)%max_depth
-        if (RF%trees(j)%node(n)%feature .eq. -1) Exit
-        if (input(RF%trees(j)%node(n)%feature) .le. RF%trees(j)%node(n)%threshold) then
-          n = RF%trees(j)%node(n)%children_left
+      do i = 1, R_FOREST%trees(j)%max_depth
+        if (R_FOREST%trees(j)%node(n)%feature .eq. -1) Exit
+        if (input(R_FOREST%trees(j)%node(n)%feature) .le. R_FOREST%trees(j)%node(n)%threshold) then
+          n = R_FOREST%trees(j)%node(n)%children_left
         else
-          n = RF%trees(j)%node(n)%children_right
+          n = R_FOREST%trees(j)%node(n)%children_right
         end if
       end do
-      predict_Random_Forest = predict_Random_Forest + RF%trees(j)%node(n)%values
+      predict_Random_Forest = predict_Random_Forest + R_FOREST%trees(j)%node(n)%values
     end do
 
-    predict_Random_Forest = predict_Random_Forest / RF%tree_count
+    predict_Random_Forest = predict_Random_Forest / R_FOREST%tree_count
 
   end function predict_Random_Forest
 
   function activation_logistic(n,X)
+    implicit none
     integer, intent(in) :: n
-    real(SP), intent(in), dimension(n) :: X
-    real(SP), dimension(n) :: activation_logistic
+    real(PS), intent(in), dimension(n) :: X
+    real(PS), dimension(n) :: activation_logistic
     activation_logistic = 1.0 / (1.0+exp(-X))
   end function activation_logistic
-  
+
   function activation_tanh(n,X)
+    implicit none
     integer, intent(in) :: n
-    real(SP), intent(in), dimension(n) :: X
-    real(SP), dimension(n) :: activation_tanh
+    real(PS), intent(in), dimension(n) :: X
+    real(PS), dimension(n) :: activation_tanh
     activation_tanh = tanh(X)
   end function activation_tanh
 
   function activation_ReLU(n,X)
+    implicit none
     integer, intent(in) :: n
-    real(SP), intent(in), dimension(n) :: X
-    real(SP), dimension(n) :: activation_ReLU
-    ! do i = 1,n
+    real(PS), intent(in), dimension(n) :: X
+    real(PS), dimension(n) :: activation_ReLU
       activation_ReLU = max(X,0.d0)
-      ! end dendo
     end function activation_ReLU
 
   function activation_identity(n,X)
+    implicit none
     integer, intent(in) :: n
-    real(SP), intent(in), dimension(n) :: X
-    real(SP), dimension(n) :: activation_identity
+    real(PS), intent(in), dimension(n) :: X
+    real(PS), dimension(n) :: activation_identity
     activation_identity = X
   end function activation_identity
 
   function activation_softmax(n,X)
+    implicit none
     integer, intent(in) :: n
-    real(SP), intent(in), dimension(n) :: X
-    real(SP), dimension(n) :: tmp
-    real(SP), dimension(n) :: activation_softmax
+    real(PS), intent(in), dimension(n) :: X
+    real(PS), dimension(n) :: tmp
+    real(PS), dimension(n) :: activation_softmax
     tmp = exp(X - maxval(X))/sum(tmp)
     activation_softmax = 1.0 / (1.0+exp(-X))
   end function activation_softmax
 
-end Module mod_fsklearn
+  subroutine generate_training_data
+    implicit none
+    character(20) :: file_name
+    integer  :: a = 1
+    real(PS) :: b = 2.0_PS
+    file_name = 'training.dat'
+    open(75,file=file_name, status = 'unknown')
+    write(75,*)
 
+  end subroutine generate_training_data
+
+  subroutine training
+    implicit none
+  end subroutine training
+
+  Subroutine Write_Line_Integer(file_num, vector, length)
+    implicit none
+
+    Integer :: file_num
+    Integer :: length
+    Integer :: vector(length)
+
+    write(file_num,*) vector
+
+  end Subroutine Write_Line_Integer
+
+  Subroutine Write_Line_Real(file_num, vector, length)
+    implicit none
+
+    Integer :: file_num
+    Integer :: length
+    real(PS) :: vector(length)
+
+    write(file_num,'(*(F14.6))') vector
+
+  end Subroutine Write_Line_Real
+
+end Module mod_fsklearn
