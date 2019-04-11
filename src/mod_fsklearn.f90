@@ -145,14 +145,48 @@ Module Mod_Fsklearn
 
 
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !--------------------------------------------------------
   !
   ! Files associate with Fsklearn. If not set, the path
   ! of the training data and the training parameters
   ! will be "fsklearn_data" and "fsklearn_para" respectively
-  ! in the current directory by default.
+  !
+  ! By dedault, only the "dsklearn_data", "fsklearn_para"
+  ! needed to be set in fsklearn_initialization
+  !
+  !--------------------------------------------------------
+  !
+  ! "para_files_path":
+  !    - the path for fsklearn related parameters
+  !
+  ! "set_ML_file":
+  !    - File name for setting parameters
+  !    - Located in the path "para_files_path"
+  !    - need to assign input vector length, output vector
+  !      length, training parameters and some other
+  !      custom parameters
+  !
+  ! "f2py_training_param":
+  !    - json file that passes the parameter to Python
+  !    - Located in the path "para_files_path"
+  !
+  ! "nn_param.dat":
+  !    - Neural network parameters from Python code
+  !    - Located in the path "para_files_path"
+  !
+  ! "dt_param.dat":
+  !    - Decision tree parameters from Python code
+  !    - Located in the path "para_files_path"
+  !
+  ! "rf_param.dat":
+  !    - Random forest parameters from Python code
+  !    - Located in the path "para_files_path"
+  !
+  !--------------------------------------------------------
   !
   ! "training_data_path":
   !    - the path for training datas
+  !
   ! "training_input_name":
   !    - File name for input data
   !    - Located in the path "training_data_path"
@@ -160,29 +194,26 @@ Module Mod_Fsklearn
   !    - If mpi with N processot is defined, there will be
   !         N input files, then all files will be gathered
   !         automatically by the Python code.
+  !
   ! "training_output_name":
   !    - Located in the path "training_data_path"
   !    - file name for put put data
   !    - The length of the data in each row is n_outputs
   !         N input files, then all files will be gathered
   !         automatically by the Python code.
-  ! "":
-  !    - the path for training datas
-  ! "set_ML_file":
-  !    - File name for ata
-  !    - Located in the path "training_data_path"
+  !
+  !--------------------------------------------------------
+  Character(100) :: para_files_path = 'fsklearn_param.namelist' 
+  Character(100) :: set_ML_file
+  Character(100) :: f2py_training_param = 'training_param.json'
+  Character(100) :: nn_param_name = 'nn_param.dat'
+  Character(100) :: dt_param_name = 'dt_param.dat'
+  Character(100) :: rf_param_name = 'rf_param.dat'
 
-  Character(50) :: training_data_path
-  Character(50) :: para_files_path
-  Character(50) :: f2py_training_param
-  Character(50) :: set_ML_file
-  Character(50) :: traing_input_name
-  Character(50) :: traing_output_name
-  Character(50) :: nn_param_name
-  Character(50) :: dt_param_name
-  Character(50) :: rf_param_name
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓End Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  Character(100) :: training_data_path
+  Character(100) :: traing_input_name   = 'training_input'
+  Character(100) :: traing_output_name  = 'training_output'
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Files↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 
   ! Predefined type variables.
@@ -202,22 +233,42 @@ Module Mod_Fsklearn
 
 Contains
 
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓Customized variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !
+  ! The Fsklearn_Initialization do the following things:
+  ! 1. read the parameters from namelist file
+  ! 2. write the parameters to the json file (if TRAINING
+  !    flag is defined)
+  ! 3. determine the machine learning method and assign
+  !    the procedure pointer to the corresponding
+  !    subroutines.
+  !
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
   Subroutine Fsklearn_Initialization
 
+# if defined(PARALLEL)
+    use mpi
+# endif
     implicit none
 
-    character(20) :: training_type
-    integer :: n_inputs
-    integer :: n_outputs
-    CHARACTER(LEN=80)::TMP_NAME
-    CHARACTER(LEN=80):: str_id
+    Character(20) :: training_type
+    Integer :: n_inputs
+    Integer :: n_outputs
+    Character(LEN=100):: tmp_name
+    Character(LEN=100):: str_id
+# if defined(PARALLEL)
+    integer :: mpi_id
+# endif
 
     namelist /sizes/ n_inputs, n_outputs
     namelist /train_type/ training_type
 
-    TMP_NAME = trim(adjustl(para_files_path))// &
-        trim(adjustl(f2py_training_param))
-    open(78,file = TMP_NAME)
+    ! set path
+    training_data_path = 'fsklearn_files/'
+    para_files_path ='fsklearn_files/'
+    call execute_command_line('mkdir '//para_files_path)
+
+    ! Read from namelist file
     TMP_NAME = trim(adjustl(para_files_path))// &
         trim(adjustl(set_ML_file))
     open(79,file = TMP_NAME)
@@ -225,21 +276,24 @@ Contains
     Read(79,nml=sizes)
     Read(79,nml=train_type)
 
-    training_data_path = ''
-    para_files_path ='fsklearn_ML/'
-    f2py_training_param = 'training_param.json'
-    set_ML_file = 'fsklearn_param.namelist'
-    traing_input_name = 'training_input'
-    traing_output_name = 'training_output'
-    nn_param_name = 'nn_param.dat'
-    dt_param_name = 'dt_param.dat'
-    rf_param_name = 'rf_param.dat'
-
     F_Sklearn%training_type = training_type
     F_Sklearn%n_inputs  = n_inputs
     F_Sklearn%n_outputs = n_outputs
 
+# if defined (FSKLEARN_TRAINING)
+    ! Write parameters to json file
+    TMP_NAME = trim(adjustl(para_files_path))// &
+        trim(adjustl(f2py_training_param))
+    open(78,file = TMP_NAME)
+    write(78,*) '{'
+    write(78,*) '    "data_path": "', TRIM((adjustl(training_data_path))), '",'
+    write(78,*) '    "training_type": "', TRIM((adjustl(training_type))), '",'
+    write(78,*) '}'
+# endif
 
+# if defined(FSKLEARN_PREDICT)
+    ! Assign the procedure pointer to the type defined
+    ! in the namelist file
     if ( trim(F_Sklearn%training_type) .eq. 'Neural_Network' ) then
       F_Sklearn%para_read => read_Neural_Network
       F_Sklearn%predict => predict_Neural_Network
@@ -250,10 +304,14 @@ Contains
       F_Sklearn%para_read => read_Random_Forest
       F_Sklearn%predict => predict_Random_Forest
     else
-      write(*,*) 'wrong training type!'
+      write(*,*) 'Wrong training type!'
+      stop
     end if
 
+    ! Read the parameters from the .dat file
     call F_Sklearn%para_read
+# endif
+
 
   end subroutine fsklearn_initialization
 
@@ -267,14 +325,17 @@ Contains
 
     character :: activation
     character :: out_activation
+    character(len=50) :: tmp
 
-    open(81,file='nn_output.dat',status='unknown')
+    tmp = trim(adjustl(para_files_path))// &
+        trim(adjustl(nn_param_name)) 
+
+    open(81,file=tmp,status='unknown')
 
     read(81,*,iostat=error) string
     read(81,*) N_Work%layers
     allocate(N_Work%layer_size(N_Work%layers))
 
-    ! read 
     read(81,*,iostat=error) string
     read(81,*) N_Work%layer_size
     N_Work%input_len = N_Work%layer_size(1)
