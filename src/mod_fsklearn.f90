@@ -1,109 +1,105 @@
+!---------------------------------------------------------
+! mod_fsklearn
+!---------------------------------------------------------
+!
+! - Some modification needs to be done if you do not want
+!   to change much to your code, including:
+!   + Initialization
+!   + Define the input and output vector and interface
+!
+! The Fsklearn_Initialization Do the following things:
+! 1. read the parameters from namelist file
+! 2. write the parameters to the json file (if TRAINING
+!    flag is defined)
+! 3. determine the machine learning method and assign
+!    the procedure pointer to the corresponding
+!    Subroutines.
+!
+!---------------------------------------------------------
+! Flow chart for TRAINING:
+! (Search the keyword TR_* to see the corresponding location)
+!---------------------------------------------------------
+!  - TR_1: Read from *.namelist file
+!  - TR_2: Choose the training type
+!    + Write to the .json file for python
+!  - PR_3: Determine the training type
+!    + the pointer procedure are assigned
+!  - TR_4: Get training data
+!    + May occur more than once
+!  - TR_5: Write training data to data file
+!    + May occur more than once
+!  - TR_6: Call the *.py file for training
+!    + [TO_UPDATE]
+!    + Call from system command
+!    + Execute after the program
+!    + The parameters for training comes from the .json file
+!  - TR_6: Training to write *.dat file
+!    + *.dat files are coefficients for prediction
+!
+!---------------------------------------------------------
+! Flow chart for PREDICTION:
+! (Search the keyword PR_* to see the corresponding location)
+!---------------------------------------------------------
+!  - PR_1: Read from *.namelist file
+!  - PR_2: Determine the training type
+!    + the pointer procedure are assigned
+!  - PR_3: Read coefficients
+!    + Read from the corresponding .dat
+!  - PR_4: Predict
+!    + May occur more than once
+!
+!--------------------------------------------------------
+! Module variables:
+!--------------------------------------------------------
+!
+! PS:
+!    - Precision for float number.
+!    - PS = 4: single precision
+!    - PS = 8: double precision
+!
+! Fsklearn_Define:
+!    - Derived type that contains the machine learning
+!       variables. It can do training and prediction
+!       with a uniform way.
+!    - %n_inputs:
+!       + length of the input vector
+!       + It is necessary to provide the length of the
+!         input vector during initialization.
+!    - %n_outputs:
+!       + length of the output vector
+!       + It is necessary to provide the length of the
+!         output vector during initialization.
+!    - %Inputs:
+!       + Input vector, not necessary
+!    - %Outputs:
+!       + Output vector, not necessary
+!    - %Para_Read:
+!       + Read the parameters and coefficients during
+!         initialization for PREDICTION.
+!    - %Predict:
+!       + Predict procedure
+!    - %Gen_Training:
+!       + Procedure for generate training data, can be
+!         point to other subroutines.
+!    - %Predict:
+!       + Procedure for initialization, can be point to
+!         other subroutines.
+! F_sklearn:
+!    - Derived type variable for Fsklearn_Define
+!
+!--------------------------------------------------------
+!
+! by Zhouteng Ye
+! Last update: 04/17/2019
+!---------------------------------------------------------
 Module Mod_Fsklearn
 
-  ! Subject to the choice of precision.
-  ! Single precision by default
+  Use Mod_Fsklearn_Essential
 # if defined(DOUBLE_PRECISION)
   Integer, Private, Parameter :: PS = 8
 # else
   Integer, Private, Parameter :: PS = 4
 # endif
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Ragged vector and array ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  !
-  ! Declearation of ragged vector and ragged matrix
-  ! Used to build neural nwtworks in this case
-  !
-  ! Ragged vectors for 2-D array consists of vectors with
-  !   different length
-  ! Ragged vectors for 3-D array consists of matrice with
-  !   different sized
-
-  Type Ragged_Vector
-    Real(PS), Allocatable :: Vec(:)
-  End Type Ragged_vector
-  Type Ragged_Matrix
-    Real(PS), Allocatable :: Mat(:,:)
-  End Type Ragged_Matrix
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Ragged vector and array ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Neural Networks variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  !
-  ! NN_activation used to choose activation function
-  !     at the beginning.
-  ! Neural_Network for choosing
-  Type :: NN_activation
-    Procedure(Sub_Interface), Pointer, NoPass :: &
-                                   Activate =>NULL()
-  End Type NN_activation
-
-  ! interface for choose activation type
-  Interface
-    Function Sub_Interface(n, x)
-      Import :: PS
-      Integer,  Intent(in) :: n
-      Real(PS), Intent(in), Dimension(n) :: x
-      Real(PS), Dimension(n) :: Sub_Interface
-    End Function Sub_Interface
-  End Interface
-
-  ! neural network parameters
-  Type :: Neural_Network
-    Integer :: input_len
-    Integer :: output_len
-    Integer :: layers
-    Integer, Allocatable :: Layer_Size(:)
-    Type(Ragged_Vector), Allocatable :: Activations(:)
-    Type(Ragged_Vector), Allocatable :: Intercepts(:)
-    Type(Ragged_Matrix), Allocatable :: Coefs(:)
-    Character(10) :: activation_type
-    Character(10) :: out_activation_type
-    Type(NN_Activation) :: Activation
-    Type(NN_Activation) :: Out_Activation
-  Contains
-    ! procedure training  => training_Neural_Network
-    Procedure , Nopass :: Para_read => Read_Neural_Network
-    Procedure , Nopass :: Predict   => Predict_Neural_Network
-  End Type Neural_Network
-
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Neural Network Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Decision Tree Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  Type Nodes
-    Integer  :: children_left
-    Integer  :: children_right
-    Integer  :: feature
-    Real(PS) :: threshold
-    Real(PS), Allocatable :: Values(:)
-  End Type Nodes
-
-  Type:: Decision_Tree
-    Integer :: node_count
-    Integer :: n_inputs
-    Integer :: n_outputs
-    Integer :: max_depth
-    Type(Nodes), allocatable :: Node(:)
-  Contains
-    Procedure , nopass :: Para_Read => Read_Decision_Tree
-    Procedure , Nopass :: Predict => Predict_Decision_Tree
-  End Type Decision_Tree
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Decision Tree Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Random Forest Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  Type:: Random_Forest
-    Integer :: tree_count
-    Integer :: n_inputs
-    Integer :: n_outputs
-    Type(Decision_Tree), allocatable :: Trees(:)
-  Contains
-    Procedure , NoPass :: Para_Read => Read_Random_Forest
-    Procedure , NoPass :: Predict => Predict_Random_Forest
-  End Type Random_Forest
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Random Forest Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
 
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Fsklearn Type Variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   Type :: Fsklearn_Define
@@ -115,7 +111,7 @@ Module Mod_Fsklearn
     Procedure(Choose_Read),    Pointer, NoPass :: Para_Read => NULL()
     Procedure(Choose_Predict), Pointer, NoPass :: Predict => NULL()
   Contains
-    Procedure, Nopass :: Gen_Training => Generate_Training_Data
+    Procedure, Nopass :: Gen_Training   => Generate_Training_Data
     Procedure, Nopass :: Initialization => fsklearn_Initialization
   End Type Fsklearn_Define
 
@@ -131,8 +127,8 @@ Module Mod_Fsklearn
   End Interface
 
   Interface
-    Subroutine Choose_read
-    End Subroutine Choose_read
+    Subroutine Choose_Read
+    End Subroutine Choose_Read
   End Interface
 
   ! Interface for the write line function
@@ -144,489 +140,235 @@ Module Mod_Fsklearn
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  !--------------------------------------------------------
-  !
-  ! Files associate with Fsklearn. If not set, the path
-  ! of the training data and the training parameters
-  ! will be "fsklearn_data" and "fsklearn_para" respectively
-  !
-  ! By dedault, only the "dsklearn_data", "fsklearn_para"
-  ! needed to be set in fsklearn_initialization
-  !
-  !--------------------------------------------------------
-  !
-  ! "para_files_path":
-  !    - the path for fsklearn related parameters
-  !
-  ! "set_ML_file":
-  !    - File name for setting parameters
-  !    - Located in the path "para_files_path"
-  !    - need to assign input vector length, output vector
-  !      length, training parameters and some other
-  !      custom parameters
-  !
-  ! "f2py_training_param":
-  !    - json file that passes the parameter to Python
-  !    - Located in the path "para_files_path"
-  !
-  ! "nn_param.dat":
-  !    - Neural network parameters from Python code
-  !    - Located in the path "para_files_path"
-  !
-  ! "dt_param.dat":
-  !    - Decision tree parameters from Python code
-  !    - Located in the path "para_files_path"
-  !
-  ! "rf_param.dat":
-  !    - Random forest parameters from Python code
-  !    - Located in the path "para_files_path"
-  !
-  !--------------------------------------------------------
-  !
-  ! "training_data_path":
-  !    - the path for training datas
-  !
-  ! "training_input_name":
-  !    - File name for input data
-  !    - Located in the path "training_data_path"
-  !    - The length of the data in each row is n_inputs
-  !    - If mpi with N processot is defined, there will be
-  !         N input files, then all files will be gathered
-  !         automatically by the Python code.
-  !
-  ! "training_output_name":
-  !    - Located in the path "training_data_path"
-  !    - file name for put put data
-  !    - The length of the data in each row is n_outputs
-  !         N input files, then all files will be gathered
-  !         automatically by the Python code.
-  !
-  !--------------------------------------------------------
-  Character(100) :: para_files_path = 'fsklearn_param.namelist' 
-  Character(100) :: set_ML_file
-  Character(100) :: f2py_training_param = 'training_param.json'
-  Character(100) :: nn_param_name = 'nn_param.dat'
-  Character(100) :: dt_param_name = 'dt_param.dat'
-  Character(100) :: rf_param_name = 'rf_param.dat'
-
-  Character(100) :: training_data_path
-  Character(100) :: traing_input_name   = 'training_input'
-  Character(100) :: traing_output_name  = 'training_output'
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Files↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
-
   ! Predefined type variables.
-  ! One may use one's own decleration
-  Type(Neural_Network) :: N_Work
-  Type(Decision_Tree) :: D_Tree
-  Type(Random_Forest) :: R_Forest
+  ! One may use one's own declaration
   Type(Fsklearn_Define) :: F_Sklearn
-
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓Customized variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  !
-  ! some variables specificially for the object model,
-  ! for example, some variables used for calculating the
-  ! input and output vectors.
-  !
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 Contains
 
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓Customized variables↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  !
-  ! The Fsklearn_Initialization do the following things:
-  ! 1. read the parameters from namelist file
-  ! 2. write the parameters to the json file (if TRAINING
-  !    flag is defined)
-  ! 3. determine the machine learning method and assign
-  !    the procedure pointer to the corresponding
-  !    subroutines.
-  !
-  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Fsklearn Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
   Subroutine Fsklearn_Initialization
 
 # if defined(PARALLEL)
-    use mpi
+    Use mpi
 # endif
-    implicit none
+    Implicit None
 
-    Character(20) :: training_type
-    Integer :: n_inputs
-    Integer :: n_outputs
-    Character(LEN=100):: tmp_name
-    Character(LEN=100):: str_id
+    Character(20)  :: training_type
+    Integer        :: n_inputs
+    Integer        :: n_outputs
+    Character(100) :: tmp_name
+    Character(100) :: str_id
+    Logical        :: train_after_run
 # if defined(PARALLEL)
-    integer :: mpi_id
+    Integer :: myid, ier, ierr, n_proc
 # endif
 
-    namelist /sizes/ n_inputs, n_outputs
-    namelist /train_type/ training_type
+    Namelist /sizes/ n_inputs, n_outputs
+    Namelist /train_type/ training_type, train_after_run
 
     ! set path
-    training_data_path = 'fsklearn_files/'
-    para_files_path ='fsklearn_files/'
-    call execute_command_line('mkdir '//para_files_path)
+    training_data_path = 'build/training/'
+    para_files_path ='build/fsklearn_files/'
+    Call Execute_Command_Line('mkdir -p '//training_data_path)
+    Call Execute_Command_Line('mkdir -p '//para_files_path)
 
+# if defined (PARALLEL)
+! mpi version
     ! Read from namelist file
-    TMP_NAME = trim(adjustl(para_files_path))// &
-        trim(adjustl(set_ML_file))
-    open(79,file = TMP_NAME)
+    Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
+    Call MPI_COMM_SIZE(MPI_COMM_WORLD, n_proc, ier)
+    If (myid .eq. 0) Then
+      tmp_name = Trim(Adjustl(para_files_path))// &
+          Trim(Adjustl(set_ML_file))
+      Open(79, file = tmp_name) ! TR_1 &PR_1
 
-    Read(79,nml=sizes)
-    Read(79,nml=train_type)
+      Read(79, nml = sizes)
+      Read(79, nml = train_type)
+
+    End If
+
+    Call MPI_BCAST(n_inputs, 1, MPI_INT, 0, &
+        MPI_COMM_WORLD, ier)
+    Call MPI_BCAST(n_outputs, 1, MPI_INT, 0, &
+        MPI_COMM_WORLD, ier)
+    Call MPI_BCAST(training_type, 20, MPI_CHARACTER, 0, &
+        MPI_COMM_WORLD, ier)
 
     F_Sklearn%training_type = training_type
-    F_Sklearn%n_inputs  = n_inputs
-    F_Sklearn%n_outputs = n_outputs
+    F_Sklearn%n_inputs      = n_inputs
+    F_Sklearn%n_outputs     = n_outputs
+
+    Write(str_id,"(I10)") myid
+    TMP_NAME = TRIM(adjustl(training_data_path))// &
+        TRIM(adjustl(traing_input_name))// &
+        Trim(adjustl(str_id))// &
+        '.dat'
+    Open(2000+myid,file=tmp_name,status='unknown')
+    TMP_NAME = TRIM(adjustl(training_data_path))// &
+        TRIM(adjustl(traing_output_name))// &
+        Trim(adjustl(str_id))// &
+        '.dat'
+    Open(3000+myid,file=tmp_name,status='unknown')
 
 # if defined (FSKLEARN_TRAINING)
-    ! Write parameters to json file
-    TMP_NAME = trim(adjustl(para_files_path))// &
-        trim(adjustl(f2py_training_param))
-    open(78,file = TMP_NAME)
-    write(78,*) '{'
-    write(78,*) '    "data_path": "', TRIM((adjustl(training_data_path))), '",'
-    write(78,*) '    "training_type": "', TRIM((adjustl(training_type))), '",'
-    write(78,*) '}'
+    ! TR_3: Write parameters to json file
+    If (myid .eq. 0) Then
+      tmp_name = Trim(adjustl(para_files_path))// &
+          Trim(adjustl(f2py_training_param))
+      Open(78, file = tmp_name)
+      Write(78, *) '{'
+      Write(78, *) '    "num_mpi": ', n_proc, ','
+      Write(78, *) '    "data_path": "', TRIM((adjustl(training_data_path))), '",'
+      Write(78, *) '    "para_path": "', TRIM((adjustl(para_files_path))), '",'
+      Write(78, *) '    "training_type": "', TRIM((adjustl(training_type))),'"'
+      Write(78, *) '}'
+    End If
 # endif
 
-# if defined(FSKLEARN_PREDICT)
-    ! Assign the procedure pointer to the type defined
+# else
+! sequential version
+    ! Read from namelist file
+    tmp_name = Trim(Adjustl(para_files_path))// &
+        Trim(Adjustl(set_ML_file))
+    Open(79, file = tmp_name)
+
+    Read(79, nml = sizes)
+    Read(79, nml = train_type)
+
+    F_Sklearn%training_type = training_type
+    F_Sklearn%n_inputs      = n_inputs
+    F_Sklearn%n_outputs     = n_outputs
+
+    tmp_name = Trim(Adjustl(training_data_path))// &
+        Trim(Adjustl(traing_input_name))// &
+        '.dat'
+    Open(2000, file=tmp_name,status='unknown')
+    tmp_name = Trim(Adjustl(training_data_path))// &
+        Trim(Adjustl(traing_output_name))// &
+        '.dat'
+    Open(3000, file=tmp_name,status='unknown')
+
+
+# if defined (FSKLEARN_TRAINING)
+    ! TR_2: Write parameters to json file
+      tmp_name = Trim(Adjustl(para_files_path))// &
+          Trim(Adjustl(f2py_training_param))
+      Open(78, file = tmp_name)
+      Write(78, *) '{'
+      Write(78, *) '    "data_path": "', Trim((Adjustl(training_data_path))), '",'
+      Write(78, *) '    "para_path": "', TRIM((adjustl(para_files_path))), '",'
+      Write(78, *) '    "training_type": "', TRIM((adjustl(training_type))),'"'
+      Write(78, *) '}'
+# endif
+
+# endif
+
+    ! TR_3 & PR_3: Assign the procedure pointer to the type defined
     ! in the namelist file
-    if ( trim(F_Sklearn%training_type) .eq. 'Neural_Network' ) then
-      F_Sklearn%para_read => read_Neural_Network
-      F_Sklearn%predict => predict_Neural_Network
-    elseif ( trim(F_Sklearn%training_type) .eq. 'Decision_Tree' ) then
-      F_Sklearn%para_read => read_Decision_Tree
-      F_Sklearn%predict => predict_Decision_Tree
-    elseif ( trim(F_Sklearn%training_type) .eq. 'Random_Forest' ) then
-      F_Sklearn%para_read => read_Random_Forest
-      F_Sklearn%predict => predict_Random_Forest
-    else
+    If ( Trim(F_Sklearn%training_type) .eq. 'Neural_Network' ) Then
+      F_Sklearn%Para_Read => Read_Neural_Network
+      F_Sklearn%Predict => Predict_Neural_Network
+    ElseIf ( Trim(F_Sklearn%Training_type) .eq. 'Decision_Tree' ) Then
+      F_Sklearn%Para_Read => Read_Decision_Tree
+      F_Sklearn%Predict => Predict_Decision_Tree
+    ElseIf ( Trim(F_Sklearn%Training_type) .eq. 'Random_Forest' ) Then
+      F_Sklearn%Para_Read => Read_Random_Forest
+      F_Sklearn%Predict => Predict_Random_Forest
+    Else
       write(*,*) 'Wrong training type!'
       stop
-    end if
+    End If
 
     ! Read the parameters from the .dat file
-    call F_Sklearn%para_read
+# if defined (FSKLEARN_PREDICTION)
+    ! Coefficients
+    call F_Sklearn%Para_Read
 # endif
 
-
-  end subroutine fsklearn_initialization
-
-
-  subroutine read_Neural_Network
-    implicit none
-
-    integer :: i,j
-    integer :: error
-    character(len=20) :: string
-
-    character :: activation
-    character :: out_activation
-    character(len=50) :: tmp
-
-    tmp = trim(adjustl(para_files_path))// &
-        trim(adjustl(nn_param_name)) 
-
-    open(81,file=tmp,status='unknown')
-
-    read(81,*,iostat=error) string
-    read(81,*) N_Work%layers
-    allocate(N_Work%layer_size(N_Work%layers))
-
-    read(81,*,iostat=error) string
-    read(81,*) N_Work%layer_size
-    N_Work%input_len = N_Work%layer_size(1)
-    N_Work%output_len = N_Work%layer_size(N_Work%layers)
+  End Subroutine Fsklearn_Initialization
 
 
-    allocate(N_Work%activations(N_Work%layers))
-    do i = 1,N_Work%layers
-      allocate(N_Work%activations(i)%vec(N_Work%layer_size(i)))
-    end do
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ Generate_Training_Data↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !
+  !-----------------------------------------------------
+  ! This part need to be modified according to the
+  !   specific needs.
+  ! I this parts,
+  !-----------------------------------------------------
+  !
+  !-----------------------------------------------------
+  ! I/O
+  !-----------------------------------------------------
+  !
+  ! Defined by user depending on the problem
+  !-----------------------------------------------------
+  Subroutine Generate_Training_Data &
+      (T_data, input_len, output_len, data_num)
 
-    read(81,*,iostat=error) string
-    allocate(N_Work%intercepts(N_Work%layers-1))
-    do i = 1,N_Work%layers-1
-      allocate(N_Work%intercepts(i)%vec(N_Work%layer_size(i+1)))
-      read(81,*) N_Work%intercepts(i)%vec
-    end do
+# if defined (PARALLEL)
+    Use mpi
+# endif
+    Implicit None
+# if defined (PARALLEL)
+    Integer  :: myid, n_proc, ier
+# endif
+    Integer  :: input_len, output_len, data_num
+    Integer  :: num_total
+    Real(PS), Dimension(data_num, input_len+output_len) :: T_data
+    Integer   :: i
 
+    num_total = input_len + output_len
 
-    read(81,*,iostat=error) string
-    allocate(N_Work%coefs(N_Work%layers-1))
-    do i = 1,N_Work%layers-1
-      allocate(N_Work%coefs(i)%mat(N_Work%layer_size(i+1),N_Work%layer_size(i)))
-      read(81,*,iostat=error) string
-      do j = 1,N_Work%layer_size(i+1)
-        read(81,*) N_Work%coefs(i)%mat(j,:)
-      end do
-    end do
+# if defined (PARALLEL)
+    Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
+    Do i = 1, data_num
+      Call Write_Line(2000+myid,T_data(i,1:input_len),input_len)
+      Call Write_Line(3000+myid,T_data(i,input_len+1:num_total),output_len)
+    End Do
+# else
+    Do i = 1, data_num
+      Call Write_Line(2000,T_data(i,1:input_len),input_len)
+      Call Write_Line(3000,T_data(i,input_len+1:num_total),output_len)
+    End Do
+# endif
 
-    read(81,*,iostat=error) string
-    read(81,*) N_Work%activation_type
-    read(81,*,iostat=error) string
-    read(81,*) N_Work%out_activation_type
+  End Subroutine Generate_Training_Data
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Generate_Training_Data↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-    close(81)
-
-    if (trim(N_Work%activation_type).eq.'logistic') then
-      N_Work%activation%activate => activation_logistic
-    else if (trim(N_Work%activation_type).eq.'tanh') then
-      N_Work%activation%activate => activation_tanh
-    else if (trim(N_Work%activation_type).eq.'softmax') then
-      N_Work%activation%activate => activation_softmax
-    else if (trim(N_Work%activation_type).eq.'relu') then
-      N_Work%activation%activate => activation_ReLU
-    else if (trim(N_Work%activation_type).eq.'identity') then
-      N_Work%activation%activate => activation_identity
-    else
-      write(*,*) 'invalid activation type'
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Write_Line↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  ! TR_4 & TR_5
+  Subroutine Training
+    Implicit None
+    if (myid .eq. 0) then
+      CALL Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
+          //'fsklearn_training.py')
     end if
+    Call MPI_BARRIER(MPI_COMM_WORLD, ier)
+  End Subroutine Training
 
-    if (trim(N_Work%out_activation_type).eq.'logistic') then
-      N_Work%out_activation%activate => activation_logistic
-    else if (trim(N_Work%out_activation_type).eq.'tanh') then
-      N_Work%out_activation%activate => activation_tanh
-    else if (trim(N_Work%out_activation_type).eq.'softmax') then
-      N_Work%out_activation%activate => activation_softmax
-    else if (trim(N_Work%out_activation_type).eq.'relu') then
-      N_Work%out_activation%activate => activation_ReLU
-    else if (trim(N_Work%out_activation_type).eq.'identity') then
-      N_Work%out_activation%activate => activation_identity
-    else
-      write(*,*) 'invalid output activation type'
-    end if
-
-  end subroutine read_Neural_Network
-
-  subroutine read_Decision_Tree
-    implicit none 
-    integer :: i,j
-    integer :: error
-    character(len=20) :: string
-
-    open(82,file='dt_output.dat',status='unknown')
-    read(82,*,iostat=error) string
-    read(82,*) D_TREE%node_count
-    read(82,*,iostat=error) string
-    read(82,*) D_TREE%n_inputs
-    read(82,*,iostat=error) string
-    read(82,*) D_TREE%n_outputs
-    read(82,*,iostat=error) string
-    read(82,*) D_TREE%max_depth
-
-    allocate(D_TREE%node(D_TREE%node_count))
-
-    do i = 1,D_TREE%node_count
-      allocate(D_TREE%node(i)%values(D_TREE%n_outputs))
-      read(82,*,iostat=error) string
-      read(82,*) D_TREE%node(i)%children_left
-      read(82,*) D_TREE%node(i)%children_right
-      read(82,*) D_TREE%node(i)%feature
-      read(82,*) D_TREE%node(i)%threshold
-      read(82,*) D_TREE%node(i)%values
-    end do
-
-    close(82)
-
-  end subroutine read_Decision_Tree
-
-  subroutine read_Random_Forest
-    implicit none
-    integer :: i,j
-    integer :: error
-    character(len=20) :: string
-    type(Decision_Tree) :: tree1
-
-    open(83,file='rf_output.dat',status='unknown')
-    read(83,*,iostat=error) string
-    read(83,*) R_FOREST%tree_count
-
-    allocate(R_FOREST%trees(R_FOREST%tree_count))
-
-    do j = 1, R_FOREST%tree_count
-      read(83,*,iostat=error) string
-      read(83,*) R_FOREST%trees(j)%node_count
-      read(83,*,iostat=error) string
-      read(83,*) R_FOREST%trees(j)%n_inputs
-      read(83,*,iostat=error) string
-      read(83,*) R_FOREST%trees(j)%n_outputs
-      read(83,*,iostat=error) string
-      read(83,*) R_FOREST%trees(j)%max_depth
-
-      allocate(R_FOREST%trees(j)%node(R_FOREST%trees(j)%node_count))
-
-      do i = 1,R_FOREST%trees(j)%node_count
-        allocate(R_FOREST%trees(j)%node(i)%values(R_FOREST%trees(j)%n_outputs))
-        read(83,*,iostat=error) string
-        read(83,*) R_FOREST%trees(j)%node(i)%children_left
-        read(83,*) R_FOREST%trees(j)%node(i)%children_right
-        read(83,*) R_FOREST%trees(j)%node(i)%feature
-        read(83,*) R_FOREST%trees(j)%node(i)%threshold
-        read(83,*) R_FOREST%trees(j)%node(i)%values
-      end do
-    end do
-
-    R_FOREST%n_inputs  = R_FOREST%trees(1)%n_inputs
-    R_FOREST%n_outputs = R_FOREST%trees(1)%n_outputs
-
-    close(83)
-
-  end subroutine read_Random_Forest
-
-  function predict_Neural_Network(input, n_input, n_output)
-    implicit none
-    integer :: n_input
-    integer :: n_output
-    real(PS) :: input(n_input)
-    real(PS) :: predict_Neural_Network(n_output) 
-    integer :: i
-
-    N_Work%activations(1)%vec = input
-
-    do i = 1, N_Work%layers-2
-      N_Work%activations(i+1)%vec = matmul(N_Work%coefs(i)%mat,N_Work%activations(i)%vec) + N_Work%intercepts(i)%vec
-      N_Work%activations(i+1)%vec =N_Work%activation%activate(N_Work%layer_size(i+1),N_Work%activations(i+1)%vec)
-    end do
-    N_Work%activations(N_Work%layers)%vec = &
-        matmul(N_Work%coefs(N_Work%layers-1)%mat,N_Work%activations(N_Work%layers-1)%vec) + N_Work%intercepts(N_Work%layers-1)%vec
-    N_Work%activations(N_Work%layers)%vec = &
-    N_Work%out_activation%activate(N_Work%output_len,N_Work%activations(N_Work%layers)%vec)
-
-    predict_Neural_Network = N_Work%activations(N_Work%layers)%vec
-
-  end function predict_Neural_Network
-
-  function predict_Decision_Tree(input,n_input,n_output)
-    implicit none
-    integer :: n_input
-    integer :: n_output
-    real(PS) :: input(n_input)
-    real(PS) :: predict_Decision_Tree(n_output)
-
-    integer :: i,n
-
-    n = 1
-    do i = 1, D_TREE%max_depth
-      if (D_TREE%node(n)%feature .eq. -1) Exit
-      if (input(D_TREE%node(n)%feature) .le. D_TREE%node(n)%threshold) then
-        n = D_TREE%node(n)%children_left
-      else
-        n = D_TREE%node(n)%children_right
-      end if
-    end do
-
-    predict_Decision_Tree = D_TREE%node(n)%values
-
-  end function predict_Decision_Tree
-
-  function predict_Random_Forest(input,n_input,n_output)
-    implicit none
-    integer :: n_input
-    integer :: n_output
-    real(PS) :: input(n_input)
-    real(PS) :: predict_Random_Forest(n_output)
-
-    integer :: i, j, n
-
-    predict_Random_Forest = 0.0_PS
-    do j = 1, R_FOREST%tree_count
-      n=1
-      do i = 1, R_FOREST%trees(j)%max_depth
-        if (R_FOREST%trees(j)%node(n)%feature .eq. -1) Exit
-        if (input(R_FOREST%trees(j)%node(n)%feature) .le. R_FOREST%trees(j)%node(n)%threshold) then
-          n = R_FOREST%trees(j)%node(n)%children_left
-        else
-          n = R_FOREST%trees(j)%node(n)%children_right
-        end if
-      end do
-      predict_Random_Forest = predict_Random_Forest + R_FOREST%trees(j)%node(n)%values
-    end do
-
-    predict_Random_Forest = predict_Random_Forest / R_FOREST%tree_count
-
-  end function predict_Random_Forest
-
-  function activation_logistic(n,X)
-    implicit none
-    integer, intent(in) :: n
-    real(PS), intent(in), dimension(n) :: X
-    real(PS), dimension(n) :: activation_logistic
-    activation_logistic = 1.0 / (1.0+exp(-X))
-  end function activation_logistic
-
-  function activation_tanh(n,X)
-    implicit none
-    integer, intent(in) :: n
-    real(PS), intent(in), dimension(n) :: X
-    real(PS), dimension(n) :: activation_tanh
-    activation_tanh = tanh(X)
-  end function activation_tanh
-
-  function activation_ReLU(n,X)
-    implicit none
-    integer, intent(in) :: n
-    real(PS), intent(in), dimension(n) :: X
-    real(PS), dimension(n) :: activation_ReLU
-      activation_ReLU = max(X,0.d0)
-    end function activation_ReLU
-
-  function activation_identity(n,X)
-    implicit none
-    integer, intent(in) :: n
-    real(PS), intent(in), dimension(n) :: X
-    real(PS), dimension(n) :: activation_identity
-    activation_identity = X
-  end function activation_identity
-
-  function activation_softmax(n,X)
-    implicit none
-    integer, intent(in) :: n
-    real(PS), intent(in), dimension(n) :: X
-    real(PS), dimension(n) :: tmp
-    real(PS), dimension(n) :: activation_softmax
-    tmp = exp(X - maxval(X))/sum(tmp)
-    activation_softmax = 1.0 / (1.0+exp(-X))
-  end function activation_softmax
-
-  subroutine generate_training_data
-    implicit none
-    character(20) :: file_name
-    integer  :: a = 1
-    real(PS) :: b = 2.0_PS
-    file_name = 'training.dat'
-    open(75,file=file_name, status = 'unknown')
-    write(75,*)
-
-  end subroutine generate_training_data
-
-  subroutine training
-    implicit none
-  end subroutine training
-
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Write_Line↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  ! Subroutine that writes a line of data to the object file
   Subroutine Write_Line_Integer(file_num, vector, length)
-    implicit none
+    Implicit None
 
     Integer :: file_num
     Integer :: length
     Integer :: vector(length)
 
-    write(file_num,*) vector
+    Write(file_num,*) vector
 
-  end Subroutine Write_Line_Integer
+  End Subroutine Write_Line_Integer
 
   Subroutine Write_Line_Real(file_num, vector, length)
-    implicit none
+    Implicit None
 
     Integer :: file_num
     Integer :: length
-    real(PS) :: vector(length)
+    Real(PS) :: vector(length)
 
-    write(file_num,'(*(F14.6))') vector
+    Write(file_num,'(*(F14.6))') vector
 
-  end Subroutine Write_Line_Real
+  End Subroutine Write_Line_Real
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Write_Line↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-end Module mod_fsklearn
+End Module Mod_Fsklearn
