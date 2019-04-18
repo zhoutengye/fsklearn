@@ -1,0 +1,51 @@
+* to-do-list
+
+** step one [2/3]
+   :LOGBOOK:
+   CLOCK: [2019-04-16 Tue 16:56]--[2019-04-16 Tue 17:21] =>  0:25
+   CLOCK: [2019-04-16 Tue 16:26]--[2019-04-16 Tue 16:51] =>  0:25
+   CLOCK: [2019-04-15 Mon 13:00]--[2019-04-15 Mon 13:25] =>  0:25
+   CLOCK: [2019-04-15 Mon 12:09]--[2019-04-15 Mon 12:34] =>  0:25
+   CLOCK: [2019-04-15 Mon 10:49]--[2019-04-15 Mon 11:14] =>  0:25
+   CLOCK: [2019-04-15 Mon 10:18]--[2019-04-15 Mon 10:43] =>  0:25
+   CLOCK: [2019-04-15 Mon 09:47]--[2019-04-15 Mon 10:12] =>  0:25
+   CLOCK: [2019-04-15 Mon 09:16]--[2019-04-15 Mon 09:41] =>  0:25
+   CLOCK: [2019-04-14 Sun 20:49]--[2019-04-14 Sun 21:14] =>  0:25
+   CLOCK: [2019-04-11 Thu 20:12]--[2019-04-11 Thu 20:37] =>  0:25
+   CLOCK: [2019-04-11 Thu 19:25]--[2019-04-11 Thu 19:50] =>  0:25
+   :END:
+   - [X] make sure it is working with the way working in subgrid
+   - [ ] comments on code
+   - [X] makefile
+    
+** step two [0/3]
+   - [ ] set parameters through FORTRAN
+   - [ ] able to predict a vector or an array
+   - [ ] Python file no linger needed
+   - [ ] Write up the documentations
+
+* flags
+
+** training [4/6]
+   - [X] GNU
+   - [X] INTEL
+   - [ ] PGI
+   - [X] parallel-GNU
+   - [X] parallel-intel
+   - [ ] parallel-PGI
+
+** prediction [4/6]
+   - [X] GNU
+   - [X] INTEL
+   - [ ] PGI
+   - [X] parallel-GNU
+   - [X] parallel-intel
+   - [ ] parallel-PGI
+
+** training+prediction [0/3]
+   - [ ] GNU
+   - [ ] INTEL
+   - [ ] PGI
+   - [ ] parallel-GNU
+   - [ ] parallel-intel
+   - [ ] parallel-PGI

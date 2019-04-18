@@ -1,9 +1,9 @@
-& sizes
+&sizes
 n_inputs = 3
 n_outputs = 3
 /
 
-& train_type
+&train_type
 ! training_type = 'Neural_Network'
 ! training_type = 'Decision_Tree'
 training_type = 'Random_Forest'
