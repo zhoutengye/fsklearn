@@ -1,8 +1,9 @@
-#+TITLE: fsklearn
+#+OPTIONS: toc:nil
+* fsklearn
 
 A simple module for machine learning in Fortran using [[https://github.com/scikit-learn/scikit-learn][scikit-learn]].
 
-* Overview
+** Overview
 
 Currently the module can be used to do training and prediction in FORTRAN. 
 
@@ -22,15 +23,14 @@ Currently, the following methods are supported for
 ## Compile the code
 ### Supported FORTRAN compiler
 
-Currently the module can be used to do training and prediction in FORTRAN. 
+- Currently the module can be used to do training and prediction in FORTRAN. 
 
-The training part uses [[https://github.com/scikit-learn/scikit-learn][scikit-learn]] library by calling Python from FORTRAN. 
+- The training part uses [[https://github.com/scikit-learn/scikit-learn][scikit-learn]] library by calling Python from FORTRAN. 
 
-The prediction part, as it may be called frequent by a FORTRAN code, is written with FORTRAN 2003. 
+- The prediction part, as it may be called frequent by a FORTRAN code, is written with FORTRAN 2003. 
 
-* Compile the code
 ** Supported FORTRAN compiler
-The following compiler are tested. 
+    The following compiler are tested. 
 - Intel - Tested with 2019.0.2.187
 - GNU - Tested with 8.1.0
 
@@ -38,18 +38,17 @@ The following compiler are tested.
 Since derived type is used in the module, it is recommended to used GNU > 5.0 or Intel > 14.0 (2013 SP1).
 
 
-** Required packages for **Python3**
+** Required packages for *Python3*
    - numpy
    - json
    - [[https://github.com/scikit-learn/scikit-learn][scikit-learn]]
 
-* Compile the code
 ** build tool
   - Makefile
   - [[https://github.com/szaghi/FoBiS][FoBis.py]] (testing)
   
 ** Run the test
-  - clone the repository
+
   #+BEGIN_SRC sh
   git clone https://github.com/Yeldon/fsklearn.git
   cd fsklearn/
@@ -62,7 +61,7 @@ Since derived type is used in the module, it is recommended to used GNU > 5.0 or
 ** Example
    Assume you have set up the file path and the correct input and output
    interface for your data, a simple main program (sequential version) could be:
-*** training
+   - training
   #+BEGIN_SRC f90
   program main
   use mod_fsklearn
@@ -80,6 +79,7 @@ Since derived type is used in the module, it is recommended to used GNU > 5.0 or
   end program main
   #+END_SRC
 
+  - prediction
   #+BEGIN_SRC f90
   program main
   use mod_fsklearn
@@ -92,7 +92,7 @@ Since derived type is used in the module, it is recommended to used GNU > 5.0 or
   F_Sklearn%outputs = F_Sklearn%predict(inputs,F_Sklearn%n_inputs,F_Sklearn%n_outputs)
   #+END_SRC
 
-* Progress[4/8]
+** Progress[4/8]
   - [X] Glue FORTRAN and Python
   - [X] Basic training and prediction interface
   - [X] MPI version
@@ -102,6 +102,6 @@ Since derived type is used in the module, it is recommended to used GNU > 5.0 or
   - [ ] Prediction for data, vector and matrix
   - [ ] Second step tests 
 
-* License
+** License
 
 This project is licensed under the BSD3 - see the [LICENSE.md](LICENSE.md) file for details
