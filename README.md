@@ -38,9 +38,7 @@ The following compiler are tested.
 -   Intel - Tested with 2019.0.2.187
 -   GNU - Tested with 8.1.0
 
-\### Required packages for ****Python3****
 Since derived type is used in the module, it is recommended to used GNU > 5.0 or Intel > 14.0 (2013 SP1).
-
 
 ## Required packages for **Python3**
 
