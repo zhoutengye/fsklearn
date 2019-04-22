@@ -85,8 +85,8 @@ interface for your data, a simple main program (sequential version) could be:
     
     Call fsklearn_initialization ! Initialization
     ! Assume you have defined your interface in mod_fsklearn
-    Call Call F_Sklearn%Fen_Training(sample_data,3, 3, 500)
-    Call Call F_Sklearn%PY_Training ! Call python to train
+    Call F_Sklearn%Fen_Training(sample_data,3, 3, 500)
+    Call F_Sklearn%PY_Training ! Call python to train
     
     end program main
 ```
@@ -94,7 +94,7 @@ interface for your data, a simple main program (sequential version) could be:
 
 -   prediction
 
-```fortran
+```
     program main
     use mod_fsklearn
     implicit none
