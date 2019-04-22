@@ -106,12 +106,14 @@ Module Mod_Fsklearn
     Character(20) :: training_type
     Integer :: n_inputs
     Integer :: n_outputs
+    Logical :: train_after_run
     Real(PS), Allocatable :: Inputs(:)
     Real(PS), Allocatable :: Outputs(:)
     Procedure(Choose_Read),    Pointer, NoPass :: Para_Read => NULL()
     Procedure(Choose_Predict), Pointer, NoPass :: Predict => NULL()
   Contains
     Procedure, Nopass :: Gen_Training   => Generate_Training_Data
+    Procedure, Nopass :: Py_Training    => Training
     Procedure, Nopass :: Initialization => fsklearn_Initialization
   End Type Fsklearn_Define
 
@@ -187,6 +189,7 @@ Contains
 
     End If
 
+
     Call MPI_BCAST(n_inputs, 1, MPI_INT, 0, &
         MPI_COMM_WORLD, ier)
     Call MPI_BCAST(n_outputs, 1, MPI_INT, 0, &
@@ -194,6 +197,7 @@ Contains
     Call MPI_BCAST(training_type, 20, MPI_CHARACTER, 0, &
         MPI_COMM_WORLD, ier)
 
+    F_Sklearn%train_after_run = train_after_run
     F_Sklearn%training_type = training_type
     F_Sklearn%n_inputs      = n_inputs
     F_Sklearn%n_outputs     = n_outputs
@@ -211,8 +215,12 @@ Contains
     Open(3000+myid,file=tmp_name,status='unknown')
 
 # if defined (FSKLEARN_TRAINING)
-    ! TR_3: Write parameters to json file
+    ! TR_3: Write parameters to python and json file 
     If (myid .eq. 0) Then
+      tmp_name = Trim(adjustl(para_files_path))// &
+          Trim(adjustl(training_py))
+      Open(77, file = tmp_name)
+      Call Generate_Training_PY(77)
       tmp_name = Trim(adjustl(para_files_path))// &
           Trim(adjustl(f2py_training_param))
       Open(78, file = tmp_name)
@@ -238,6 +246,7 @@ Contains
     F_Sklearn%training_type = training_type
     F_Sklearn%n_inputs      = n_inputs
     F_Sklearn%n_outputs     = n_outputs
+    F_Sklearn%train_after_run = train_after_run
 
     tmp_name = Trim(Adjustl(training_data_path))// &
         Trim(Adjustl(traing_input_name))// &
@@ -250,7 +259,11 @@ Contains
 
 
 # if defined (FSKLEARN_TRAINING)
-    ! TR_2: Write parameters to json file
+    ! TR_2: Write parameters to python and json file 
+      tmp_name = Trim(adjustl(para_files_path))// &
+          Trim(adjustl(training_py))
+      Open(77, file = tmp_name)
+      Call Generate_Training_PY(77)
       tmp_name = Trim(Adjustl(para_files_path))// &
           Trim(Adjustl(f2py_training_param))
       Open(78, file = tmp_name)
@@ -291,16 +304,7 @@ Contains
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ Generate_Training_Data↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   !
   !-----------------------------------------------------
-  ! This part need to be modified according to the
-  !   specific needs.
-  ! I this parts,
-  !-----------------------------------------------------
-  !
-  !-----------------------------------------------------
-  ! I/O
-  !-----------------------------------------------------
-  !
-  ! Defined by user depending on the problem
+  ! User defined
   !-----------------------------------------------------
   Subroutine Generate_Training_Data &
       (T_data, input_len, output_len, data_num)
@@ -335,17 +339,40 @@ Contains
   End Subroutine Generate_Training_Data
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Generate_Training_Data↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Write_Line↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  ! TR_4 & TR_5
-  Subroutine Training
-    Implicit None
-    if (myid .eq. 0) then
-      CALL Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
-          //'fsklearn_training.py')
-    end if
-    Call MPI_BARRIER(MPI_COMM_WORLD, ier)
-  End Subroutine Training
 
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Call python to train↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !---------------------------------------------------------------
+  ! If train_after_run is set as .True. in the .namelist file,
+  ! run the python file after training.
+  !---------------------------------------------------------------
+  Subroutine Training
+# if defined (PARALLEL)
+    Use mpi
+    Implicit None
+
+    Integer :: ier, myid
+
+    If (F_Sklearn%train_after_run .eqv. .True.) Then
+      Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
+
+      If (myid .eq. 0) then
+        Call Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
+            //Adjustl(Trim(training_py)) )
+      End If
+    End If
+
+    Call MPI_BARRIER(MPI_COMM_WORLD, ier)
+# else
+    Implicit None
+    If (F_Sklearn%train_after_run .eqv. .True.) Then
+      Call Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
+          //Adjustl(Trim(training_py)) )
+    End If
+# endif
+
+  End Subroutine Training
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑end training↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+  
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Write_Line↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   ! Subroutine that writes a line of data to the object file
   Subroutine Write_Line_Integer(file_num, vector, length)

@@ -10,24 +10,23 @@
 #--------------------------------------------------------------------------
 #        Used to choose two cases for test
 #        Not necessary for the implementation
-  FLAG_2 = -DPARALLEL
-  FLAG_3 = -DFSKLEARN_TRAINING
-  # FLAG_4 = -DFSKLEARN_PREDICTION
+  # FLAG_2 = -DPARALLEL
+  # FLAG_3 = -DFSKLEARN_TRAINING
+  FLAG_4 = -DFSKLEARN_PREDICTION
 
 #--------------------fortran compiler and flags----------------------------
   CPP      = /usr/bin/cpp 
   CPPFLAGS = -P -traditional 
   CPPARGS  = $(CPPFLAGS) $(FLAG_1) $(FLAG_2) $(FLAG_3) $(FLAG_4) $(FLAG_5) 
-  
-  # FC       = ifort
-  # FC       = gfortran
-  FC       = mpiifort
-  # FC       = mpif90
+
+	# FC       = ifort
+	# FC       = mpiifort
+	FC       = gfortran
+	# FC       = mpif90
   OPT      =  -O3
   FCFLAGS  = $(OPT)
-  FFLAGS   = $(OPT) 
+  FFLAGS   = $(OPT)
 #==========================================================================
-
 
 BUILD_DIR = build
 SRC_DIR = src
@@ -42,6 +41,7 @@ OBJS := $(patsubst $(PRE_DIR)/%.f90,$(OBJ_DIR)/%.o,$(PRES))
 
 # keep the *.f90 files in $(PRE_DIR) after make
 .PRECIOUS: $(PRE_DIR)/%.f90
+
 
 # pre-processors
 $(PRE_DIR)/%.f90 : $(SRC_DIR)/%.f90
@@ -67,6 +67,7 @@ $(PRE_DIR):
 	mkdir -p $(PRE_DIR)
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(MOD_DIR)
+
 
 #--------------------------------------------------------------------------
 #  Tar Up Code

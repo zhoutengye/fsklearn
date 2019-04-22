@@ -385,7 +385,7 @@ Contains
       Allocate(N_Work%activations(i)%vec(N_Work%layer_size(i)))
     End do
 
-    Read(4000+myid, *,ostat=error) string
+    Read(4000+myid, *,iostat=error) string
     Allocate(N_Work%intercepts(N_Work%layers-1))
     Do i = 1,N_Work%layers-1
       Allocate(N_Work%intercepts(i)%vec(N_Work%layer_size(i+1)))
@@ -893,16 +893,60 @@ Contains
     Implicit None
     Integer :: file_num
 
-    Call Generate_Training_M
+    Call Generate_Training_PY_imports(file_num)
+    Call Generate_Training_PY_SK2F(file_num)
+    Call Generate_Training_PY_main(file_num)
 
   End Subroutine Generate_Training_PY
 
-  Subroutine Generate_Training_main
+  Subroutine Generate_Training_PY_main(file_num)
     Implicit None
     Integer :: file_num
+    
+    write(file_num,'(A)') "for root, dirs, files in os.walk(""build""):"
+    write(file_num,'(A)') "    for file in files:"
+    write(file_num,'(A)') "        if file.endswith("".json""):"
+    write(file_num,'(A)') "             json_f = os.path.join(root, file)"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "with open(json_f) as json_file:"
+    write(file_num,'(A)') "    params = json.load(json_file)"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "T_data_path = params['data_path']"
+    write(file_num,'(A)') "param_path = params['para_path']"
+    write(file_num,'(A)') "training_type = params['training_type']"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "if 'num_mpi' in params.keys():"
+    write(file_num,'(A)') "    T_input  = np.loadtxt(T_data_path+'training_input0.dat')"
+    write(file_num,'(A)') "    T_output  = np.loadtxt(T_data_path+'training_output0.dat')"
+    write(file_num,'(A)') "    for i in range(params['num_mpi']-1):"
+    write(file_num,'(A)') "        file_name = T_data_path+'training_input' + str(i+1)+'.dat'"
+    write(file_num,'(A)') "        file_name1 = T_data_path+'training_output' + str(i+1)+'.dat'"
+    write(file_num,'(A)') "        T_input = np.append(T_input,np.loadtxt(file_name), axis=0)"
+    write(file_num,'(A)') "        T_output = np.append(T_output,np.loadtxt(file_name1), axis=0)"
+    write(file_num,'(A)') "else:"
+    write(file_num,'(A)') "    T_input  = np.loadtxt(T_data_path+'training_input.dat')"
+    write(file_num,'(A)') "    T_output  = np.loadtxt(T_data_path+'training_output.dat')"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "if (training_type == 'Neural_Network'):"
+    write(file_num,'(A)') "    ml = MLPRegressor()"
+    write(file_num,'(A)') "elif (training_type == 'Random_Forest'):"
+    write(file_num,'(A)') "    ml = RandomForestRegressor()"
+    write(file_num,'(A)') "elif (training_type == 'Decision_Tree'):"
+    write(file_num,'(A)') "    ml = tree.DecisionTreeRegressor()"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "ml.fit(T_input, T_output)"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "ml.type = training_type"
+    write(file_num,'(A)') "ml.output_param_path = param_path"
+    write(file_num,'(A)') "sk2f(ml)"
+    write(file_num,'(A)') ""
+    write(file_num,'(A)') "print('-------------------------------\n')"
+    write(file_num,'(A)') "print('training_completed\n\n')"
+    write(file_num,'(A)') "print('training_type:\n')"
+    write(file_num,'(A)') "print(training_type+'\n')"
+    write(file_num,'(A)') "print('-------------------------------\n')"
 
-
-  End Subroutine Generate_Training_main
+  End Subroutine Generate_Training_PY_main
 
   Subroutine Generate_Training_PY_imports(file_num)
     Implicit None

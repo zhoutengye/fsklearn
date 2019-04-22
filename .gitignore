@@ -33,6 +33,8 @@
 *.app
 test
 
+.swp
+build/
 *.dat
 
 # python
