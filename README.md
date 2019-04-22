@@ -82,7 +82,7 @@ interface for your data, a simple main program (sequential version) could be:
 
 -   prediction
 
-```
+```fortran
     program main
     use mod_fsklearn
     implicit none
