@@ -6,29 +6,22 @@ A simple module for machine learning in Fortran using [[https://github.com/sciki
 
 ** Overview
 
-Currently the module can be used to do training and prediction in FORTRAN. 
-
-The training part uses [scikit-learn](https://github.com/scikit-learn/scikit-learn) library by calling Python from FORTRAN. 
-
 The prediction part, as it may be called frequent by a FORTRAN code, is written with FORTRAN. 
-
-
-## Supported machine learning method
-Currently, the following methods are supported for
-**regression** (not classification) problem:
-
-- Neual Networks
-- Decision Tree
-- Random Forest
-
-## Compile the code
-### Supported FORTRAN compiler
 
 - Currently the module can be used to do training and prediction in FORTRAN. 
 
 - The training part uses [[https://github.com/scikit-learn/scikit-learn][scikit-learn]] library by calling Python from FORTRAN. 
 
 - The prediction part, as it may be called frequent by a FORTRAN code, is written with FORTRAN 2003. 
+
+** Supported machine learning method
+Currently, the following methods are supported for
+*regression* (not classification) problem:
+
+- Neual Networks
+- Decision Tree
+- Random Forest
+
 
 ** Supported FORTRAN compiler
     The following compiler are tested. 
