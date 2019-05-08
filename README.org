@@ -82,13 +82,13 @@ Currently, the following methods are supported for
   F_Sklearn%outputs = F_Sklearn%predict(inputs,F_Sklearn%n_inputs,F_Sklearn%n_outputs)
   #+END_SRC
 
-** Progress[4/8]
+** Progress[6/8]
   - [X] Glue FORTRAN and Python
   - [X] Basic training and prediction interface
   - [X] MPI version
   - [X] First step tests
-  - [ ] A more smart Python code generator
-  - [ ] Parameters for training function 
+  - [X] A more smart Python code generator
+  - [X] Parameters for training function 
   - [ ] Prediction for data, vector and matrix
   - [ ] Second step tests 
 

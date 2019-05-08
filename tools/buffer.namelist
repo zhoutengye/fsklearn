@@ -1,0 +1,4 @@
+&nn_parameter
+
+solver="sgd"
+/

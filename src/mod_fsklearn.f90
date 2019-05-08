@@ -8,8 +8,8 @@
 !   + Define the input and output vector and interface
 !
 ! The Fsklearn_Initialization Do the following things:
-! 1. read the parameters from namelist file
-! 2. write the parameters to the json file (if TRAINING
+! 1. read the coefficients from namelist file
+! 2. write the coefficients to the json file (if TRAINING
 !    flag is defined)
 ! 3. determine the machine learning method and assign
 !    the procedure pointer to the corresponding
@@ -32,7 +32,7 @@
 !    + [TO_UPDATE]
 !    + Call from system command
 !    + Execute after the program
-!    + The parameters for training comes from the .json file
+!    + The coefficients for training comes from the .json file
 !  - TR_6: Training to write *.dat file
 !    + *.dat files are coefficients for prediction
 !
@@ -73,8 +73,8 @@
 !       + Input vector, not necessary
 !    - %Outputs:
 !       + Output vector, not necessary
-!    - %Para_Read:
-!       + Read the parameters and coefficients during
+!    - %Coef_Read:
+!       + Read the Coefficients and coefficients during
 !         initialization for PREDICTION.
 !    - %Predict:
 !       + Predict procedure
@@ -109,7 +109,7 @@ Module Mod_Fsklearn
     Logical :: train_after_run
     Real(PS), Allocatable :: Inputs(:)
     Real(PS), Allocatable :: Outputs(:)
-    Procedure(Choose_Read),    Pointer, NoPass :: Para_Read => NULL()
+    Procedure(Choose_Read),    Pointer, NoPass :: Coef_Read => NULL()
     Procedure(Choose_Predict), Pointer, NoPass :: Predict => NULL()
   Contains
     Procedure, Nopass :: Gen_Training   => Generate_Training_Data
@@ -145,6 +145,7 @@ Module Mod_Fsklearn
   ! Predefined type variables.
   ! One may use one's own declaration
   Type(Fsklearn_Define) :: F_Sklearn
+  Type(Generate_Python) :: Py2f
 
 Contains
 
@@ -170,9 +171,9 @@ Contains
 
     ! set path
     training_data_path = 'build/training/'
-    para_files_path ='build/fsklearn_files/'
+    coef_files_path ='build/fsklearn_files/'
     Call Execute_Command_Line('mkdir -p '//training_data_path)
-    Call Execute_Command_Line('mkdir -p '//para_files_path)
+    Call Execute_Command_Line('mkdir -p '//coef_files_path)
 
 # if defined (PARALLEL)
 ! mpi version
@@ -180,7 +181,7 @@ Contains
     Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
     Call MPI_COMM_SIZE(MPI_COMM_WORLD, n_proc, ier)
     If (myid .eq. 0) Then
-      tmp_name = Trim(Adjustl(para_files_path))// &
+      tmp_name = Trim(Adjustl(coef_files_path))// &
           Trim(Adjustl(set_ML_file))
       Open(79, file = tmp_name) ! TR_1 &PR_1
 
@@ -204,30 +205,32 @@ Contains
 
     Write(str_id,"(I10)") myid
     TMP_NAME = TRIM(adjustl(training_data_path))// &
-        TRIM(adjustl(traing_input_name))// &
+        TRIM(adjustl(training_input_name))// &
         Trim(adjustl(str_id))// &
         '.dat'
     Open(2000+myid,file=tmp_name,status='unknown')
     TMP_NAME = TRIM(adjustl(training_data_path))// &
-        TRIM(adjustl(traing_output_name))// &
+        TRIM(adjustl(training_output_name))// &
         Trim(adjustl(str_id))// &
         '.dat'
     Open(3000+myid,file=tmp_name,status='unknown')
 
 # if defined (FSKLEARN_TRAINING)
-    ! TR_3: Write parameters to python and json file 
+    ! TR_3: Write Coefficients to python and json file 
     If (myid .eq. 0) Then
-      tmp_name = Trim(adjustl(para_files_path))// &
+      tmp_name = Trim(adjustl(coef_files_path))// &
           Trim(adjustl(training_py))
       Open(77, file = tmp_name)
-      Call Generate_Training_PY(77)
-      tmp_name = Trim(adjustl(para_files_path))// &
-          Trim(adjustl(f2py_training_param))
+      ! Call Generate_Training_PY(77)
+      Call py2f%Gen_Training_Param(79,F_Sklearn%Training_type)
+      Call Py2f%Generate_Training_Py(77)
+      tmp_name = Trim(adjustl(coef_files_path))// &
+          Trim(adjustl(f2py_training_coef))
       Open(78, file = tmp_name)
       Write(78, *) '{'
       Write(78, *) '    "num_mpi": ', n_proc, ','
       Write(78, *) '    "data_path": "', TRIM((adjustl(training_data_path))), '",'
-      Write(78, *) '    "para_path": "', TRIM((adjustl(para_files_path))), '",'
+      Write(78, *) '    "coef_path": "', TRIM((adjustl(coef_files_path))), '",'
       Write(78, *) '    "training_type": "', TRIM((adjustl(training_type))),'"'
       Write(78, *) '}'
     End If
@@ -236,7 +239,7 @@ Contains
 # else
 ! sequential version
     ! Read from namelist file
-    tmp_name = Trim(Adjustl(para_files_path))// &
+    tmp_name = Trim(Adjustl(coef_files_path))// &
         Trim(Adjustl(set_ML_file))
     Open(79, file = tmp_name)
 
@@ -249,27 +252,29 @@ Contains
     F_Sklearn%train_after_run = train_after_run
 
     tmp_name = Trim(Adjustl(training_data_path))// &
-        Trim(Adjustl(traing_input_name))// &
+        Trim(Adjustl(training_input_name))// &
         '.dat'
     Open(2000, file=tmp_name,status='unknown')
     tmp_name = Trim(Adjustl(training_data_path))// &
-        Trim(Adjustl(traing_output_name))// &
+        Trim(Adjustl(training_output_name))// &
         '.dat'
     Open(3000, file=tmp_name,status='unknown')
 
 
 # if defined (FSKLEARN_TRAINING)
-    ! TR_2: Write parameters to python and json file 
-      tmp_name = Trim(adjustl(para_files_path))// &
+    ! TR_2: Write coefficients to python and json file 
+      tmp_name = Trim(adjustl(coef_files_path))// &
           Trim(adjustl(training_py))
       Open(77, file = tmp_name)
-      Call Generate_Training_PY(77)
-      tmp_name = Trim(Adjustl(para_files_path))// &
-          Trim(Adjustl(f2py_training_param))
+      ! Call Generate_Training_PY(77)
+      Call py2f%Gen_Training_Param(79,F_Sklearn%Training_type)
+      Call Py2f%Generate_Training_Py(77)
+      tmp_name = Trim(Adjustl(coef_files_path))// &
+          Trim(Adjustl(f2py_training_coef))
       Open(78, file = tmp_name)
       Write(78, *) '{'
       Write(78, *) '    "data_path": "', Trim((Adjustl(training_data_path))), '",'
-      Write(78, *) '    "para_path": "', TRIM((adjustl(para_files_path))), '",'
+      Write(78, *) '    "coef_path": "', TRIM((adjustl(coef_files_path))), '",'
       Write(78, *) '    "training_type": "', TRIM((adjustl(training_type))),'"'
       Write(78, *) '}'
 # endif
@@ -279,23 +284,23 @@ Contains
     ! TR_3 & PR_3: Assign the procedure pointer to the type defined
     ! in the namelist file
     If ( Trim(F_Sklearn%training_type) .eq. 'Neural_Network' ) Then
-      F_Sklearn%Para_Read => Read_Neural_Network
+      F_Sklearn%Coef_Read => Read_Neural_Network
       F_Sklearn%Predict => Predict_Neural_Network
     ElseIf ( Trim(F_Sklearn%Training_type) .eq. 'Decision_Tree' ) Then
-      F_Sklearn%Para_Read => Read_Decision_Tree
+      F_Sklearn%Coef_Read => Read_Decision_Tree
       F_Sklearn%Predict => Predict_Decision_Tree
     ElseIf ( Trim(F_Sklearn%Training_type) .eq. 'Random_Forest' ) Then
-      F_Sklearn%Para_Read => Read_Random_Forest
+      F_Sklearn%Coef_Read => Read_Random_Forest
       F_Sklearn%Predict => Predict_Random_Forest
     Else
       write(*,*) 'Wrong training type!'
       stop
     End If
 
-    ! Read the parameters from the .dat file
+    ! Read the coefficients from the .dat file
 # if defined (FSKLEARN_PREDICTION)
     ! Coefficients
-    call F_Sklearn%Para_Read
+    call F_Sklearn%Coef_Read
 # endif
 
   End Subroutine Fsklearn_Initialization
@@ -356,7 +361,7 @@ Contains
       Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
 
       If (myid .eq. 0) then
-        Call Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
+        Call Execute_Command_Line('python '//Adjustl(Trim(coef_files_path)) &
             //Adjustl(Trim(training_py)) )
       End If
     End If
@@ -365,7 +370,7 @@ Contains
 # else
     Implicit None
     If (F_Sklearn%train_after_run .eqv. .True.) Then
-      Call Execute_Command_Line('python '//Adjustl(Trim(para_files_path)) &
+      Call Execute_Command_Line('python '//Adjustl(Trim(coef_files_path)) &
           //Adjustl(Trim(training_py)) )
     End If
 # endif

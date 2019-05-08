@@ -100,8 +100,8 @@ interface for your data, a simple main program (sequential version) could be:
 -   [X] Basic training and prediction interface
 -   [X] MPI version
 -   [X] First step tests
--   [ ] A more smart Python code generator
--   [ ] Parameters for training function
+-   [X] A more smart Python code generator
+-   [X] Parameters for training function
 -   [ ] Prediction for data, vector and matrix
 -   [ ] Second step tests
 

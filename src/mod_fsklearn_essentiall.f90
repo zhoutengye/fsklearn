@@ -35,37 +35,37 @@
 !--------------------------------------------------------
 !
 ! - Files associate with Fsklearn. If not set, the path
-!   of the training data and the training parameters
-!   will be "fsklearn_data" and "fsklearn_para" respectively
+!   of the training data and the training coefficients
+!   will be "fsklearn_data" and "fsklearn_coef" respectively
 !
-! - By dedault, only the "dsklearn_data", "fsklearn_para"
+! - By dedault, only the "dsklearn_data", "fsklearn_coef"
 !   needed to be set in fsklearn_initialization.
 !
-! - "para_files_path":
-!   + the path for fsklearn related parameters
+! - "coef_files_path":
+!   + the path for fsklearn related coefficients
 !
 ! - "set_ML_file":
-!   + File name for setting parameters
-!   + Located in the path "para_files_path"
+!   + File name for setting coefficients
+!   + Located in the path "coef_files_path"
 !   + need to assign input vector length, output vector
-!     length, training parameters and some other
-!     custom parameters
+!     length, training coefficients and some other
+!     custom coefficients
 !
-! - "f2py_training_param":
-!   + json file that passes the parameter to Python
-!   + Located in the path "para_files_path"
+! - "f2py_training_coef":
+!   + json file that passes the coefficient to Python
+!   + Located in the path "coef_files_path"
 !
-! - "nn_param.dat":
-!   + Neural network parameters from Python code
-!   + Located in the path "para_files_path"
+! - "nn_coef.dat":
+!   + Neural network coefficients from Python code
+!   + Located in the path "coef_files_path"
 !
-! - "dt_param.dat":
-!   + Decision tree parameters from Python code
-!   + Located in the path "para_files_path"
+! - "dt_coefficients.dat":
+!   + Decision tree coefficients from Python code
+!   + Located in the path "coef_files_path"
 !
-! - "rf_param.dat":
-!   + Random forest parameters from Python code
-!   + Located in the path "para_files_path"
+! - "rf_coef.dat":
+!   + Random forest coefficients from Python code
+!   + Located in the path "coef_files_path"
 !
 ! - "training_data_path":
 !   + the path for training data
@@ -115,8 +115,8 @@
 !       + Input vector, not necessary
 !    - %Outputs:
 !       + Output vector, not necessary
-!    - %Para_Read:
-!       + Read the parameters and coefficients during
+!    - %Coef_Read:
+!       + Read the coefficients and coefficients during
 !         initialization for PREDICTION.
 !    - %Predict:
 !       + Predict procedure
@@ -176,8 +176,8 @@
 !       + Uniform procedure calling activation function
 !    - %Out_activation:
 !       + Uniform procedure calling out activation function
-!    - %Para_Read:
-!       + Uniform procedure reading Neural Network parameters
+!    - %Coef_Read:
+!       + Uniform procedure reading Neural Network Coefficients
 !    - %Predict:
 !       + Uniform procedure predicting Neural Network results
 !
@@ -257,7 +257,7 @@ Module Mod_Fsklearn_Essential
     End Function Sub_Interface
   End Interface
 
-  ! neural network parameters
+  ! neural network coefficients
   Type :: Neural_Network
     Integer :: input_len
     Integer :: output_len
@@ -271,7 +271,7 @@ Module Mod_Fsklearn_Essential
     Type(NN_Activation) :: Activation
     Type(NN_Activation) :: Out_Activation
   Contains
-    Procedure , NoPass :: Para_Read => Read_Neural_Network
+    Procedure , NoPass :: Coef_Read => Read_Neural_Network
     Procedure , NoPass :: Predict   => Predict_Neural_Network
   End Type Neural_Network
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Neural Network Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
@@ -293,7 +293,7 @@ Module Mod_Fsklearn_Essential
     Integer :: max_depth
     Type(Nodes), Allocatable :: Node(:)
   Contains
-    Procedure , NoPass :: Para_Read => Read_Decision_Tree
+    Procedure , NoPass :: Coef_Read => Read_Decision_Tree
     Procedure , NoPass :: Predict => Predict_Decision_Tree
   End Type Decision_Tree
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Decision Tree Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
@@ -306,23 +306,67 @@ Module Mod_Fsklearn_Essential
     Integer :: n_outputs
     Type(Decision_Tree), Allocatable :: Trees(:)
   Contains
-    Procedure , NoPass :: Para_Read => Read_Random_Forest
+    Procedure , NoPass :: Coef_Read => Read_Random_Forest
     Procedure , NoPass :: Predict => Predict_Random_Forest
   End Type Random_Forest
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Random Forest Variables↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Python_File_Generator↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  Type :: NN_Parameters
+    Integer :: num_para = 21
+    Character(50) :: key(21)
+    Character(50) :: value(21)
+  Contains
+    Procedure :: NN_Load_Default_Para
+    Procedure :: NN_Read_and_Update_Para
+  End Type NN_Parameters
+
+  Type :: DT_Parameters
+    Integer :: num_para = 12
+    Character(50) :: key(12)
+    Character(50) :: value(12)
+  Contains
+    Procedure :: DT_Load_Default_Para
+    Procedure :: DT_Read_and_Update_Para
+  End Type DT_Parameters
+
+  Type :: RF_Parameters
+    Integer :: num_para = 16
+    Character(50) :: key(16)
+    Character(50) :: value(16)
+  Contains
+    Procedure :: RF_Load_Default_Para
+    Procedure :: RF_Read_and_Update_Para
+  End Type RF_Parameters
+
+  Type :: Generate_Python
+    Character(20) :: training_type
+    Character(1000) :: Training_script
+    Type(NN_Parameters) :: NN_Para
+    Type(DT_Parameters) :: DT_Para
+    Type(RF_Parameters) :: RF_Para
+  Contains
+    Procedure :: Py_Import
+    Procedure :: Generate_Training_PY
+    Procedure :: PY_data_processing
+    Procedure :: sk2f
+    Procedure :: Gen_Training_Param
+  End Type Generate_Python
+
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Python_file_generator↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+  
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Files↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-  Character(100) :: para_files_path
-  Character(100) :: set_ML_file         = 'fsklearn_param.namelist'
-  Character(100) :: f2py_training_param = 'training_param.json'
-  Character(100) :: nn_param_name       = 'nn_param.dat'
-  Character(100) :: dt_param_name       = 'dt_param.dat'
-  Character(100) :: rf_param_name       = 'rf_param.dat'
+  Character(100) :: Coef_files_path
+  Character(100) :: set_ML_file         = 'fsklearn_coef.namelist'
+  Character(100) :: f2py_training_coef  = 'training_coef.json'
+  Character(100) :: nn_coef_name        = 'nn_coef.dat'
+  Character(100) :: dt_coef_name       = 'dt_coef.dat'
+  Character(100) :: rf_coef_name       = 'rf_coef.dat'
   Character(100) :: training_py         = 'training.py'
 
   Character(100) :: training_data_path
-  Character(100) :: traing_input_name   = 'training_input'
-  Character(100) :: traing_output_name  = 'training_output'
+  Character(100) :: training_input_name   = 'training_input'
+  Character(100) :: training_output_name  = 'training_output'
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑End Files↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
   ! Predefined type variables
@@ -352,8 +396,8 @@ Contains
     Character(10) :: string_myid
     Integer :: ier
 
-    tmp = Trim(adjustl(para_files_path))// &
-        Trim(adjustl(nn_param_name))
+    tmp = Trim(adjustl(coef_files_path))// &
+        Trim(adjustl(nn_coef_name))
 
 # if defined (PARALLEL)
 ! Parallel version
@@ -530,8 +574,8 @@ Contains
     Character(10) :: string_myid
     Integer :: ier
 
-    tmp = Trim(Adjustl(para_files_path))// &
-        Trim(Adjustl(dt_param_name)) 
+    tmp = Trim(Adjustl(coef_files_path))// &
+        Trim(Adjustl(dt_coef_name)) 
 
 # if defined (PARALLEL)
 ! Parallel version
@@ -549,7 +593,7 @@ Contains
 
     Open(4000+myid, file=tmp, status='unknown')
 
-    ! tree related parameters
+    ! tree related coefficients
     Read(4000+myid,*,iostat=error) string
     Read(4000+myid,*) D_Tree%node_count
     Read(4000+myid,*,iostat=error) string
@@ -625,8 +669,8 @@ Contains
     Character(10) :: string_myid
     Integer :: ier
 
-    tmp = Trim(Adjustl(para_files_path))// &
-        Trim(Adjustl(rf_param_name)) 
+    tmp = Trim(Adjustl(coef_files_path))// &
+        Trim(Adjustl(rf_coef_name)) 
 
 # if defined (PARALLEL)
 ! Parallel version
@@ -889,55 +933,51 @@ Contains
   !  Very ugly subroutines. Simply write to .py file
   !  line by line. Will come back for further development
   !
-  Subroutine Generate_Training_PY(file_num)
+  Subroutine Generate_Training_PY(self, file_num)
     Implicit None
+    Class(Generate_Python) :: self
     Integer :: file_num
 
-    Call Generate_Training_PY_imports(file_num)
-    Call Generate_Training_PY_SK2F(file_num)
-    Call Generate_Training_PY_main(file_num)
+    Call self%PY_import(file_num)
+    Call self%SK2F(file_num)
+    Call self%PY_data_processing(file_num)
 
   End Subroutine Generate_Training_PY
 
-  Subroutine Generate_Training_PY_main(file_num)
+  Subroutine PY_data_processing(self, file_num)
+#if defined (Parallel)
+    Use MPI
+#endif
     Implicit None
+    Class(Generate_Python) :: self
     Integer :: file_num
-    
-    write(file_num,'(A)') "for root, dirs, files in os.walk(""build""):"
-    write(file_num,'(A)') "    for file in files:"
-    write(file_num,'(A)') "        if file.endswith("".json""):"
-    write(file_num,'(A)') "             json_f = os.path.join(root, file)"
-    write(file_num,'(A)') ""
-    write(file_num,'(A)') "with open(json_f) as json_file:"
-    write(file_num,'(A)') "    params = json.load(json_file)"
-    write(file_num,'(A)') ""
-    write(file_num,'(A)') "T_data_path = params['data_path']"
-    write(file_num,'(A)') "param_path = params['para_path']"
-    write(file_num,'(A)') "training_type = params['training_type']"
-    write(file_num,'(A)') ""
-    write(file_num,'(A)') "if 'num_mpi' in params.keys():"
-    write(file_num,'(A)') "    T_input  = np.loadtxt(T_data_path+'training_input0.dat')"
-    write(file_num,'(A)') "    T_output  = np.loadtxt(T_data_path+'training_output0.dat')"
-    write(file_num,'(A)') "    for i in range(params['num_mpi']-1):"
-    write(file_num,'(A)') "        file_name = T_data_path+'training_input' + str(i+1)+'.dat'"
-    write(file_num,'(A)') "        file_name1 = T_data_path+'training_output' + str(i+1)+'.dat'"
-    write(file_num,'(A)') "        T_input = np.append(T_input,np.loadtxt(file_name), axis=0)"
-    write(file_num,'(A)') "        T_output = np.append(T_output,np.loadtxt(file_name1), axis=0)"
-    write(file_num,'(A)') "else:"
-    write(file_num,'(A)') "    T_input  = np.loadtxt(T_data_path+'training_input.dat')"
-    write(file_num,'(A)') "    T_output  = np.loadtxt(T_data_path+'training_output.dat')"
-    write(file_num,'(A)') ""
-    write(file_num,'(A)') "if (training_type == 'Neural_Network'):"
-    write(file_num,'(A)') "    ml = MLPRegressor()"
-    write(file_num,'(A)') "elif (training_type == 'Random_Forest'):"
-    write(file_num,'(A)') "    ml = RandomForestRegressor()"
-    write(file_num,'(A)') "elif (training_type == 'Decision_Tree'):"
-    write(file_num,'(A)') "    ml = tree.DecisionTreeRegressor()"
-    write(file_num,'(A)') ""
+    Integer :: num_proc, ier
+
+    write(file_num,'(A)') "T_data_path = '"//Trim(training_data_path) // "'"
+    write(file_num,'(A)') "coef_path = '"//Trim(coef_files_path)//"'"
+    write(file_num,'(A)') "training_type = '"//Trim(self%Training_type)//"'"
+    write(file_num,'(A)') "input_name = '"//Trim(training_input_name)//"'"
+    write(file_num,'(A)') "output_name = '"//Trim(training_output_name)//"'"
+#if defined (Parallel)
+    write(file_num,'(A)') "T_input  = np.loadtxt(T_data_path + input_name+'0.dat')"
+    write(file_num,'(A)') "T_output  = np.loadtxt(T_data_path + output_name+'0.dat')"
+    Call MPI_Comm_size( MPI_COMM_WORLD, num_proc, ier )
+    write(file_num,'(A)') "for i in range("//num2str(num_proc-1)//"):"
+    write(file_num,'(A)') "    file_name = T_data_path+ input_name + str(i+1) + '.dat'"
+    write(file_num,'(A)') "    file_name1 = T_data_path + output_name + str(i+1) + '.dat'"
+    write(file_num,'(A)') "    T_input = np.append(T_input,np.loadtxt(file_name), axis=0)"
+    write(file_num,'(A)') "    T_output = np.append(T_output,np.loadtxt(file_name1), axis=0)"
+#else
+    write(file_num,'(A)') "T_input  = np.loadtxt(T_data_path + input_name+ '.dat')"
+    write(file_num,'(A)') "T_output  = np.loadtxt(T_data_path + output_name + '.dat')"
+#endif
+
+    write(file_num,'(A)') self%Training_script
+
     write(file_num,'(A)') "ml.fit(T_input, T_output)"
     write(file_num,'(A)') ""
     write(file_num,'(A)') "ml.type = training_type"
-    write(file_num,'(A)') "ml.output_param_path = param_path"
+    write(file_num,'(A)') "ml.output_coef_path = coef_path"
     write(file_num,'(A)') "sk2f(ml)"
     write(file_num,'(A)') ""
     write(file_num,'(A)') "print('-------------------------------\n')"
@@ -946,10 +986,11 @@ Contains
     write(file_num,'(A)') "print(training_type+'\n')"
     write(file_num,'(A)') "print('-------------------------------\n')"
 
-  End Subroutine Generate_Training_PY_main
+  End Subroutine PY_data_processing
 
-  Subroutine Generate_Training_PY_imports(file_num)
+  Subroutine Py_import(self, file_num)
     Implicit None
+    Class(Generate_Python) :: self
     Integer :: file_num
     write(file_num,'(A)') "import json"
     write(file_num,'(A)') "import numpy as np"
@@ -960,25 +1001,26 @@ Contains
     write(file_num,'(A)') "import os"
     write(file_num,'(A)') ""
 
-  End Subroutine Generate_Training_PY_imports
+  End Subroutine Py_import
 
-  Subroutine Generate_Training_PY_SK2F(file_num)
+  Subroutine SK2F(self, file_num)
     Implicit None
+    Class(Generate_Python) :: self
     Integer :: file_num
-    write(file_num,'(A)') "def sk2f(write_paras):"
-    write(file_num,'(A)') "    if (write_paras.type == 'Neural_Network'):"
-    write(file_num,'(A)') "        nn_sk2f(write_paras)"
-    write(file_num,'(A)') "    elif (write_paras.type == 'Random_Forest'):"
-    write(file_num,'(A)') "        rf_sk2f(write_paras)"
-    write(file_num,'(A)') "    elif (write_paras.type == 'Decision_Tree'):"
-    write(file_num,'(A)') "        dt_sk2f(write_paras)"
+    write(file_num,'(A)') "def sk2f(write_coef):"
+    write(file_num,'(A)') "    if (write_coef.type == 'Neural_Network'):"
+    write(file_num,'(A)') "        nn_sk2f(write_coef)"
+    write(file_num,'(A)') "    elif (write_coef.type == 'Random_Forest'):"
+    write(file_num,'(A)') "        rf_sk2f(write_coef)"
+    write(file_num,'(A)') "    elif (write_coef.type == 'Decision_Tree'):"
+    write(file_num,'(A)') "        dt_sk2f(write_coef)"
     write(file_num,'(A)') "    else:"
     write(file_num,'(A)') "        print('wrong type')"
     write(file_num,'(A)') ""
     write(file_num,'(A)') "def nn_sk2f(nn):"
     write(file_num,'(A)') ""
-    write(file_num,'(A)') "    file_name = 'nn_param.dat'"
-    write(file_num,'(A)') "    nn_output  = open(nn.output_param_path+file_name, 'w')"
+    write(file_num,'(A)') "    file_name = 'nn_coef.dat'"
+    write(file_num,'(A)') "    nn_output  = open(nn.output_coef_path+file_name, 'w')"
     write(file_num,'(A)') "    nn_output.write('! n_layers\n%d\n'%(nn.n_layers_))"
     write(file_num,'(A)') "    nn_output.write('! layer_sizes\n')"
     write(file_num,'(A)') "    nn_output.write('%d \n'%np.shape(nn.coefs_[0])[0])"
@@ -1008,7 +1050,7 @@ Contains
     write(file_num,'(A)') ""
     write(file_num,'(A)') "def dt_sk2f(dt):"
     write(file_num,'(A)') ""
-    write(file_num,'(A)') "    dt_output = open(dt.output_param_path+'dt_param.dat','w')"
+    write(file_num,'(A)') "    dt_output = open(dt.output_coef_path+'dt_coef.dat','w')"
     write(file_num,'(A)') ""
     write(file_num,'(A)') "    dt_output.write('! node_count\n')"
     write(file_num,'(A)') "    dt_output.write('%d\n'%dt.tree_.node_count)"
@@ -1031,7 +1073,7 @@ Contains
     write(file_num,'(A)') ""
     write(file_num,'(A)') "def rf_sk2f(rf):"
     write(file_num,'(A)') ""
-    write(file_num,'(A)') "    rf_output = open(rf.output_param_path+'rf_param.dat','w')"
+    write(file_num,'(A)') "    rf_output = open(rf.output_coef_path+'rf_coef.dat','w')"
     write(file_num,'(A)') ""
     write(file_num,'(A)') "    rf_output.write('! tree_count\n')"
     write(file_num,'(A)') "    rf_output.write('%d\n'%len(rf.estimators_))"
@@ -1061,7 +1103,557 @@ Contains
     write(file_num,'(A)') ""
     write(file_num,'(A)') ""
 
-  End Subroutine Generate_Training_PY_SK2F
+  End Subroutine SK2F
   !↑↑↑↑↑↑↑↑↑↑↑↑↑End generating python file↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-  
+
+ Subroutine NN_Load_Default_Para(self)
+    Implicit None
+    Class(NN_Parameters) :: self
+
+    self%key(1)= 'hidden_layer_sizes'
+    self%value(1)= "(100,)"
+
+    self%key(2) = 'activation'
+    self%value(2) = "'relu'"
+
+    self%key(3) = 'solver'
+    self%value(3) = "'adam'"
+
+    self%key(4) = 'alpha'
+    self%value(4) = "0.0001"
+
+    self%key(5) = 'batch_size'
+    self%value(5) = "'auto'"
+
+    self%key(6) = 'learning_rate'
+    self%value(6) = "'constant'"
+
+    self%key(7) = 'learning_rate_init'
+    self%value(7) = "0.001"
+
+    self%key(8) = 'power_t'
+    self%value(8) = "0.5"
+
+    self%key(9) = 'max_iter'
+    self%value(9) = "200"
+
+    self%key(10) = 'shuffle'
+    self%value(10) = "True"
+
+    self%key(11) = 'random_state'
+    self%value(11) = "None"
+
+    self%key(12) = 'tol'
+    self%value(12) = "0.0001"
+
+    self%key(13) = 'verbose'
+    self%value(13) = "False"
+
+    self%key(14) = 'warm_start'
+    self%value(14) = "False"
+
+    self%key(15) = 'momentum'
+    self%value(15) = "True"
+
+    self%key(16) = 'nesterovs_momentum'
+    self%value(16) = "True"
+
+    self%key(17) = 'early_stopping'
+    self%value(17) = "False"
+
+    self%key(18) = "validation_fraction"
+    self%value(18) = "0.1"
+
+    self%key(19) = 'beta_1'
+    self%value(19) = "0.9"
+
+    self%key(20) = 'beta_2'
+    self%value(20) = "0.999"
+
+    self%key(21) = 'epsilon'
+    self%value(21) = "1e-08"
+
+  end Subroutine NN_Load_Default_Para
+
+  Subroutine NN_Read_and_Update_Para(self, file_num)
+    Implicit None
+
+    Class(NN_Parameters) :: self
+    Integer, Intent(In) :: file_num
+    Character(50) :: hidden_layer_sizes = "NULL"
+    Character(50) :: activation = "NULL"
+    Character(50) :: solver = "NULL"
+    Character(50) :: alpha = "NULL"
+    Character(50) :: batch_size = "NULL"
+    Character(50) :: learning_rate = "NULL"
+    Character(50) :: learning_rate_init = "NULL"
+    Character(50) :: power_t = "NULL"
+    Character(50) :: max_iter = "NULL"
+    Character(50) :: shuffle = "NULL"
+    Character(50) :: random_state = "NULL"
+    Character(50) :: tol = "NULL"
+    Character(50) :: verbose = "NULL"
+    Character(50) :: warm_start = 'NULL'
+    Character(50) :: momentum = "NULL"
+    Character(50) :: nesterovs_momentum = "NULL"
+    Character(50) :: early_stopping = "NULL"
+    Character(50) :: validation_fraction = "NULL"
+    Character(50) :: beta_1 = "NULL"
+    Character(50) :: beta_2 = "NULL"
+    Character(50) :: epsilon = "NULL"
+
+    Namelist /NN_Parameter/ hidden_layer_sizes, &
+        activation, &
+        solver, &
+        alpha, &
+        batch_size, &
+        learning_rate, &
+        learning_rate_init, &
+        power_t, &
+        max_iter, &
+        shuffle, &
+        random_state, &
+        tol, &
+        verbose, &
+        warm_start, &
+        momentum, &
+        nesterovs_momentum, &
+        early_stopping, &
+        validation_fraction, &
+        beta_1, &
+        beta_2, &
+        epsilon
+
+    Call self%NN_Load_Default_Para
+
+    Read(file_num, nml = NN_Parameter)
+
+    If (hidden_layer_sizes  .ne. 'NULL') Then
+      self%value(1) = hidden_layer_sizes 
+    End If
+
+    If (activation .ne. 'NULL') Then
+      self%value(2) = activation
+    End If
+
+    If (solver .ne. 'NULL') Then
+      self%value(3) = solver
+    End If
+
+    If (alpha .ne. 'NULL') Then
+      self%value(4) = alpha
+    End If
+
+    If (batch_size .ne. 'NULL') Then
+      self%value(5) = batch_size
+    End If
+
+    If (learning_rate .ne. 'NULL') Then
+      self%value(6) = learning_rate
+    End If
+
+    If (learning_rate_init .ne. 'NULL') Then
+      self%value(7) = learning_rate_init
+    End If
+
+    If (power_t .ne. 'NULL') Then
+      self%value(8) = power_t
+    End If
+
+    If (max_iter .ne. 'NULL') Then
+      self%value(9) = max_iter
+    End If
+
+    If (shuffle .ne. 'NULL') Then
+      self%value(10) = shuffle
+    End If
+
+    If (random_state .ne. 'NULL') Then
+      self%value(11) = random_state
+    End If
+
+    If (tol .ne. 'NULL') Then
+      self%value(12) = tol
+    End If
+
+    If (verbose .ne. 'NULL') Then
+      self%value(13) = verbose
+    End If
+
+    If (warm_start .ne. 'NULL') Then
+      self%value(14) = warm_start
+    End If
+
+    If (momentum .ne. 'NULL') Then
+      self%value(15) = momentum
+    End If
+
+    If (nesterovs_momentum .ne. 'NULL') Then
+      self%value(16) = nesterovs_momentum
+    End If
+
+    If (early_stopping .ne. 'NULL') Then
+      self%value(17) = early_stopping
+    End If
+
+    If (validation_fraction .ne. 'NULL') Then
+      self%value(18) = validation_fraction
+    End If
+
+    If (beta_1 .ne. 'NULL') Then
+      self%value(19) = beta_1
+    End If
+
+    If (beta_2 .ne. 'NULL') Then
+      self%value(20) = beta_2
+    End If
+
+    If (epsilon .ne. 'NULL') Then
+      self%value(21) = epsilon
+    End If
+
+  end Subroutine NN_Read_and_Update_Para
+
+ Subroutine DT_Load_Default_Para(self)
+    Implicit None
+    Class(DT_Parameters) :: self
+
+    self%key(1) = "criterion"
+    self%value(1) = "'mse'"
+
+    self%key(2) = "splitter"
+    self%value(2) = "'best'"
+
+    self%key(3) = "max_depth"
+    self%value(3) = "None"
+
+    self%key(4) = "min_samples_split"
+    self%value(4) = "2 "
+
+    self%key(5) = "min_samples_leaf"
+    self%value(5) = "1"
+
+    self%key(6) = "min_weight_fraction_leaf"
+    self%value(6) = "0.0"
+
+    self%key(7) = "max_features"
+    self%value(7) = "None"
+
+    self%key(8) = "random_state"
+    self%value(8) = "None"
+
+    self%key(9) = "max_leaf_nodes"
+    self%value(9) = "None"
+
+    self%key(10) = "min_impurity_decrease"
+    self%value(10) = "0.0"
+
+    self%key(11) = "min_impurity_split"
+    self%value(11) = "None"
+
+    self%key(12) = "presort "
+    self%value(12) = "False"
+
+  end Subroutine DT_Load_Default_Para
+
+  Subroutine DT_Read_and_Update_Para(self, file_num)
+    Implicit None
+
+    Class(DT_Parameters) :: self
+    Integer, intent(in) :: file_num
+    Character(50) :: criterion ='NULL'
+    Character(50) :: splitter ='NULL'
+    Character(50) :: max_depth = 'NULL'
+    Character(50) :: min_samples_split = 'NULL'
+    Character(50) :: min_samples_leaf = 'NULL'
+    Character(50) :: min_weight_fraction_leaf = 'NULL'
+    Character(50) :: max_features = 'NULL'
+    Character(50) :: random_state = 'NULL'
+    Character(50) :: max_leaf_nodes ='NULL'
+    Character(50) :: min_impurity_decrease = 'NULL'
+    Character(50) :: min_impurity_split = 'NULL'
+    Character(50) :: presort = 'NULL'
+
+    Namelist /DT_Parameter/ criterion , &
+        splitter , &
+        max_depth , &
+        min_samples_split , &
+        min_samples_leaf , &
+        min_weight_fraction_leaf , &
+        max_features , &
+        random_state , &
+        max_leaf_nodes , &
+        min_impurity_decrease , &
+        min_impurity_split , &
+        presort 
+
+    Call self%DT_Load_Default_Para
+
+    Read(file_num, nml = DT_Parameter)
+
+    If (criterion  .ne. 'NULL') Then
+      self%value(1) = criterion 
+    End If
+
+    If (splitter  .ne. 'NULL') Then
+      self%value(2) = splitter 
+    End If
+
+    If (max_depth  .ne. 'NULL') Then
+      self%value(3) = max_depth 
+    End If
+
+    If (min_samples_split  .ne. 'NULL') Then
+      self%value(4) = min_samples_split 
+    End If
+
+    If (min_samples_leaf  .ne. 'NULL') Then
+      self%value(5) = min_samples_leaf 
+    End If
+
+    If (min_weight_fraction_leaf  .ne. 'NULL') Then
+      self%value(6) = min_weight_fraction_leaf 
+    End If
+
+    If (max_features  .ne. 'NULL') Then
+      self%value(7) = max_features 
+    End If
+
+    If (random_state  .ne. 'NULL') Then
+      self%value(8) = random_state 
+    End If
+
+    If (max_leaf_nodes  .ne. 'NULL') Then
+      self%value(9) = max_leaf_nodes 
+    End If
+
+    If (min_impurity_decrease  .ne. 'NULL') Then
+      self%value(10) = min_impurity_decrease 
+    End If
+
+    If (min_impurity_split  .ne. 'NULL') Then
+      self%value(11) = min_impurity_split 
+    End If
+
+    If (presort  .ne. 'NULL') Then
+      self%value(12) = presort 
+    End If
+
+
+  end Subroutine DT_Read_and_Update_Para
+
+ Subroutine RF_Load_Default_Para(self)
+    Implicit None
+    Class(RF_Parameters) :: self
+
+    self%key(1) = "n_estimators"
+    self%value(1) = "'warn' "
+
+    self%key(2) = "criterion"
+    self%value(2) = "'mse' "
+
+    self%key(3) = "max_depth"
+    self%value(3) = "None"
+
+    self%key(4) = "min_samples_split"
+    self%value(4) = "2 "
+
+    self%key(5) = "min_samples_leaf"
+    self%value(5) = "1"
+
+    self%key(6) = "min_weight_fraction_leaf"
+    self%value(6) = "0.0 "
+
+    self%key(7) = "max_features"
+    self%value(7) = "'auto' "
+
+    self%key(8) = "max_leaf_nodes"
+    self%value(8) = "None"
+
+    self%key(9) = "min_impurity_decrease"
+    self%value(9) = "0.0 "
+
+    self%key(10) = "min_impurity_split"
+    self%value(10) = "None"
+
+    self%key(11) = "bootstrap"
+    self%value(11) = "True "
+
+    self%key(12) = "oob_score"
+    self%value(12) = "False "
+
+    self%key(13) = "n_jobs"
+    self%value(13) = "None"
+
+    self%key(14) = "random_state"
+    self%value(14) = "None "
+
+    self%key(15) = "verbose"
+    self%value(15) = "0 "
+
+    self%key(16) = "warm_start"
+    self%value(16) = "False"
+
+  End Subroutine RF_Load_Default_Para
+
+  Subroutine RF_Read_and_Update_Para(self, file_num)
+    Implicit None
+
+    Class(RF_Parameters) :: self
+    Integer, intent(in) :: file_num
+
+    Character(50) :: n_estimators= 'NULL'
+    Character(50) :: criterion= 'NULL'
+    Character(50) :: max_depth= 'NULL'
+    Character(50) :: min_samples_split= 'NULL'
+    Character(50) :: min_samples_leaf= 'NULL'
+    Character(50) :: min_weight_fraction_leaf= 'NULL'
+    Character(50) :: max_features= 'NULL'
+    Character(50) :: max_leaf_nodes= 'NULL'
+    Character(50) :: min_impurity_decrease= 'NULL'
+    Character(50) :: min_impurity_split= 'NULL'
+    Character(50) :: bootstrap= 'NULL'
+    Character(50) :: oob_score= 'NULL'
+    Character(50) :: n_jobs= 'NULL'
+    Character(50) :: random_state= 'NULL'
+    Character(50) :: verbose= 'NULL'
+    Character(50) :: warm_start= 'NULL'
+
+    Namelist /RF_Parameter/ n_estimators, &
+        criterion, &
+        max_depth, &
+        min_samples_split, &
+        min_samples_leaf, &
+        min_weight_fraction_leaf, &
+        max_features, &
+        max_leaf_nodes, &
+        min_impurity_decrease, &
+        min_impurity_split, &
+        bootstrap, &
+        oob_score, &
+        n_jobs, &
+        random_state, &
+        verbose, &
+        warm_start
+
+    Call self%RF_Load_Default_Para
+
+    Read(file_num, nml = RF_Parameter)
+
+    If (n_estimators .ne. 'NULL') Then
+      self%value(1) = n_estimators
+    End If
+
+    If (criterion .ne. 'NULL') Then
+      self%value(2) = criterion
+    End If
+
+    If (max_depth .ne. 'NULL') Then
+      self%value(3) = max_depth
+    End If
+
+    If (min_samples_split .ne. 'NULL') Then
+      self%value(4) = min_samples_split
+    End If
+
+    If (min_samples_leaf .ne. 'NULL') Then
+      self%value(5) = min_samples_leaf
+    End If
+
+    If (min_weight_fraction_leaf .ne. 'NULL') Then
+      self%value(6) = min_weight_fraction_leaf
+    End If
+
+    If (max_features .ne. 'NULL') Then
+      self%value(7) = max_features
+    End If
+
+    If (max_leaf_nodes .ne. 'NULL') Then
+      self%value(8) = max_leaf_nodes
+    End If
+
+    If (min_impurity_decrease .ne. 'NULL') Then
+      self%value(9) = min_impurity_decrease
+    End If
+
+    If (min_impurity_split .ne. 'NULL') Then
+      self%value(10) = min_impurity_split
+    End If
+
+    If (bootstrap .ne. 'NULL') Then
+      self%value(11) = bootstrap
+    End If
+
+    If (oob_score .ne. 'NULL') Then
+      self%value(12) = oob_score
+    End If
+
+    If (n_jobs .ne. 'NULL') Then
+      self%value(13) = n_jobs
+    End If
+
+    If (random_state .ne. 'NULL') Then
+      self%value(14) = random_state
+    End If
+
+    If (verbose .ne. 'NULL') Then
+      self%value(15) = verbose
+    End If
+
+    If (warm_start .ne. 'NULL') Then
+      self%value(16) = warm_start
+    End If
+
+  end Subroutine RF_Read_and_Update_Para
+
+  Subroutine Gen_Training_Param(self, file_num, Training_type)
+    Implicit None
+    Class(Generate_Python) :: self
+    Integer, intent(in) :: file_num
+    Character(20) :: Training_type
+    Character(1000) :: Temp
+    Integer :: i
+
+    self%Training_type = Training_type
+
+    If (self%Training_type .eq. 'Neural_Network') Then
+      Call self%NN_Para%NN_Read_and_Update_Para(file_num)
+      Temp = 'ml = MLPRegressor('
+      Do i = 1, self%NN_para%num_para - 1
+        Temp = Trim(Temp)//Trim(self%NN_Para%key(i)) // &
+            ' = ' // Trim(self%NN_Para%value(i)) // ','
+      End Do
+      i = self%NN_para%num_para
+      Temp = Trim(Temp)//Trim(self%NN_Para%key(i)) // &
+          ' = ' // Trim(self%NN_Para%value(i)) // ')'
+    Else If (self%Training_type .eq. 'Decision_Tree') Then
+      Call self%DT_Para%DT_Read_and_Update_Para(file_num)
+
+      Temp = 'ml = tree.DecisionTreeRegressor('
+      Do i = 1, self%DT_para%num_para - 1
+        Temp = Trim(Temp)//Trim(self%DT_Para%key(i)) // &
+            ' = ' // Trim(self%DT_Para%value(i)) // ','
+      End Do
+      i = self%DT_para%num_para
+      Temp = Trim(Temp)//Trim(self%DT_Para%key(i)) // &
+          ' = ' // Trim(self%DT_Para%value(i)) // ')'
+    Else If (self%Training_type .eq. 'Random_Forest') Then
+      Call self%RF_Para%RF_Read_and_Update_Para(file_num)
+
+      Temp = 'ml = RandomForestRegressor('
+      Do i = 1, self%RF_para%num_para - 1
+        Temp = Trim(Temp)//Trim(self%RF_Para%key(i)) // &
+            ' = ' // Trim(self%RF_Para%value(i)) // ','
+      End Do
+      i = self%RF_para%num_para
+      Temp = Trim(Temp)//Trim(self%RF_Para%key(i)) // &
+          ' = ' // Trim(self%RF_Para%value(i)) // ')'
+    End If
+    self%Training_script = Temp
+
+    print *, temp
+
+  End Subroutine Gen_Training_Param
+
+
 End Module Mod_Fsklearn_Essential

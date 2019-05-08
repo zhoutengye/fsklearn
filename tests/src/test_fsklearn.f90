@@ -27,7 +27,7 @@ Program main_MPI
 # if defined(FSKLEARN_TRAINING)
   Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
   if (myid .eq. 0) then !
-    test_data = Trim(para_files_path)//'sample.dat'
+    test_data = Trim(coef_files_path)//'sample.dat'
     open(1,file = test_data)
     do i = 1,1000
       read(1,*) sample_data(i,:)
@@ -83,7 +83,7 @@ Program main_sequential
   Call F_Sklearn%initialization
 
 # if defined(FSKLEARN_TRAINING)
-  test_data = Trim(para_files_path)//'sample.dat'
+  test_data = Trim(coef_files_path)//'sample.dat'
   open(1,file = test_data)
   do i = 1,1000
     read(1,*) sample_data(i,:)
