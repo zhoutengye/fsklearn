@@ -94,7 +94,7 @@ interface for your data, a simple main program (sequential version) could be:
     F_Sklearn%outputs = F_Sklearn%predict(inputs,F_Sklearn%n_inputs,F_Sklearn%n_outputs)
 ``` 
 
-## Progress<code>[4/8]</code>
+## Progress<code>[6/8]</code>
 
 -   [X] Glue FORTRAN and Python
 -   [X] Basic training and prediction interface
