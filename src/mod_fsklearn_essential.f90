@@ -3,7 +3,8 @@
 !---------------------------------------------------------
 !
 !   - In this module, some essential parts for the fsklearn
-!     are defined. They include three types of essential
+!     are defined. They include the basic class Fsklearn_IO
+! three types of essential
 !     functions, some files and some derived type variables.
 !  - They will be used in mod_fsklearn to build the full
 !     machine learning module.
@@ -244,7 +245,7 @@ Module Mod_Fsklearn_Essential
 # endif
 
   Type String
-    Character(100) :: str
+    Character(50) :: str
   End type String
 
   Type :: Fsklearn_IO
@@ -258,11 +259,11 @@ Module Mod_Fsklearn_Essential
     Integer :: num_para
     Type(String) , Allocatable :: key(:)
     Type(String) , Allocatable :: value(:)
-    Character(100) :: Coef_files_path      = ''
+    Character(100) :: Coef_files_path      = './'
     Character(100) :: Coef_File_Name       = ''
     Character(100) :: set_ML_file          = 'fsklearn_coef.namelist'
     Character(100) :: training_py          = 'training.py'
-    Character(100) :: training_data_path   = ''
+    Character(100) :: training_data_path   = './'
     Character(100) :: training_input_name  = 'training_input'
     Character(100) :: training_output_name = 'training_output'
   Contains
@@ -270,6 +271,7 @@ Module Mod_Fsklearn_Essential
     Procedure , pass(self) :: Read_Coef => Common_Read_Coef
     Procedure :: Gen_PY => Generate_Training_Python
     Procedure :: Read_Training_Param => Common_Read_and_Update_Param
+    Procedure :: Generate_Parameter_Script
     Procedure :: Py_Import
     Procedure :: PY_main
     Procedure :: PY_sk2f
@@ -388,7 +390,7 @@ Contains
 # endif
 
     Namelist /sizes/ n_inputs, n_outputs
-    Namelist /train_type/ training_type, train_after_run
+    Namelist /training_setting/  train_after_run
 
     select type (self)
     type is (Fsklearn_IO)
@@ -396,19 +398,19 @@ Contains
     class is (Neural_Network)
       self%Training_Type = 'Neural_Network'
       self%num_para = 21
+      self%Coef_File_Name = 'nn_coef.dat'
     class is (Decision_Tree)
       self%Training_Type = 'Decision_Tree'
       self%num_para = 12
+      self%Coef_File_Name = 'dt_coef.dat'
     class is (Random_Forest)
       self%Training_Type = 'Random_Forest'
       self%num_para = 16
+      self%Coef_File_Name = 'rf_coef.dat'
     end select
 
     Allocate(self%key(self%num_para))
     Allocate(self%value(self%num_para))
-
-    self%training_data_path = 'build/training/'
-    self%coef_files_path    = 'build/fsklearn_files/'
 
     ! set path
     Call Execute_Command_Line('mkdir -p '//self%training_data_path)
@@ -423,9 +425,10 @@ Contains
       tmp_name = Trim(Adjustl(self%coef_files_path))// &
           Trim(Adjustl(self%set_ML_file))
       Open(79, file = tmp_name) ! TR_1 &PR_1
-
       Read(79, nml = sizes)
-      Read(79, nml = train_type)
+      Read(79, nml = training_setting)
+      Close(79)
+      Open(79, file = tmp_name)
 
     End If
 
@@ -433,11 +436,8 @@ Contains
         MPI_COMM_WORLD, ier)
     Call MPI_BCAST(n_outputs, 1, MPI_INT, 0, &
         MPI_COMM_WORLD, ier)
-    Call MPI_BCAST(training_type, 20, MPI_CHARACTER, 0, &
-        MPI_COMM_WORLD, ier)
 
     self%train_after_run = train_after_run
-    self%training_type   = training_type
     self%n_inputs        = n_inputs
     self%n_outputs       = n_outputs
 
@@ -461,9 +461,10 @@ Contains
     Open(79, file = tmp_name)
 
     Read(79, nml = sizes)
-    Read(79, nml = train_type)
+    Read(79, nml = training_setting)
+    Close(79)
+    Open(79, file = tmp_name)
 
-    self%training_type  = training_type
     self%n_inputs       = n_inputs
     self%n_outputs       = n_outputs
     self%train_after_run = train_after_run
@@ -485,14 +486,14 @@ Contains
       tmp_name = Trim(adjustl(self%coef_files_path))// &
           Trim(adjustl(self%training_py))
       Open(77, file = tmp_name)
-      Call self%Read_Training_Param(79)
+      Call self%Generate_Parameter_Script(79)
       Call self%Gen_PY(77)
-    End If
+    End if
 # else
     tmp_name = Trim(adjustl(self%coef_files_path))// &
         Trim(adjustl(self%training_py))
     Open(77, file = tmp_name)
-    Call self%Read_Training_Param(79)
+    Call self%Generate_Parameter_Script(79)
     Call self%Gen_PY(77)
 # endif
 # endif
@@ -587,7 +588,7 @@ Contains
 
     Close(4000+myid)
 
-    if (Trim(selfk%Activation_type).eq.'logistic') Then
+    if (Trim(self%Activation_type).eq.'logistic') Then
       self%activation%activate => Activation_logistic
     else if (Trim(self%Activation_type).eq.'tanh') Then
       self%activation%activate => Activation_tanh
@@ -800,7 +801,7 @@ Contains
     Integer :: error
     Character(100) :: string
     character(100) :: tmp, tmp1
-# if defined(PARALELL)
+# if defined(PARALLEL)
     Integer :: n_proc
     Integer :: myid
     Character(10) :: string_myid
@@ -1098,30 +1099,37 @@ Contains
     Class(FSKLEARN_IO) :: self
     Integer, Intent(in) :: file_num 
 
+    Call self%Py_Import(file_num)
+    Call self%Py_sk2f(file_num)
+    Call self%Py_Main(file_num)
+
+    Close(file_num)
 
   end Subroutine Generate_Training_Python
 
   Subroutine PY_main(self, file_num)
-#if defined (Parallel)
+#if defined (PARALLEL)
     Use MPI
 #endif
     Implicit None
     Class(Fsklearn_IO) :: self
     Integer, Intent(in) :: file_num
     Integer :: num_proc, ier
+    Character(10) :: str_proc
 
     write(file_num,'(A)') "T_data_path = '"//Trim(self%training_data_path) // "'"
     write(file_num,'(A)') "coef_path = '"//Trim(self%coef_files_path)//"'"
     write(file_num,'(A)') "training_type = '"//Trim(self%Training_type)//"'"
     write(file_num,'(A)') "input_name = '"//Trim(self%training_input_name)//"'"
     write(file_num,'(A)') "output_name = '"//Trim(self%training_output_name)//"'"
-#if defined (Parallel)
+#if defined (PARALLEL)
     write(file_num,'(A)') "T_input  = np.loadtxt(T_data_path + input_name+'0.dat')"
     write(file_num,'(A)') "T_output  = np.loadtxt(T_data_path + output_name+'0.dat')"
     Call MPI_Comm_size( MPI_COMM_WORLD, num_proc, ier )
-    write(file_num,'(A)') "for i in range("//num2str(num_proc-1)//"):"
-    write(file_num,'(A)') "    file_name = T_data_path+ input_name + str(i+1) + '.dat'"
-    write(file_num,'(A)') "    file_name1 = T_data_path + output_name + str(i+1) + '.dat'"
+    Write(str_proc,"(I10)") num_proc
+    write(file_num,'(A)') "for i in range("//Trim(str_proc)//"):"
+    write(file_num,'(A)') "    file_name = T_data_path+ input_name + str(i) + '.dat'"
+    write(file_num,'(A)') "    file_name1 = T_data_path + output_name + str(i) + '.dat'"
     write(file_num,'(A)') "    T_input = np.append(T_input,np.loadtxt(file_name), axis=0)"
     write(file_num,'(A)') "    T_output = np.append(T_output,np.loadtxt(file_name1), axis=0)"
 #else
@@ -1680,6 +1688,8 @@ Contains
     self%key(16)%str = "warm_start"
     self%value(16)%str = "False"
 
+    Read(file_num, nml = RF_Parameter)
+
     If (n_estimators .ne. 'NULL') Then
       self%value(1)%str = n_estimators
     End If
@@ -1746,7 +1756,7 @@ Contains
 
   end Subroutine RF_Read_and_Update_Param
 
-  Subroutine Gen_Para_Script(self, file_num)
+  Subroutine Generate_Parameter_Script(self, file_num)
     Implicit None
     Class(Fsklearn_IO) :: self
     Integer, Intent(in) :: file_num
@@ -1755,16 +1765,14 @@ Contains
 
     Call self%Read_Training_Param(file_num)
 
-    select type (self)
-    type is (Fsklearn_IO)
-      ! no further initialization required
-    class is (Neural_Network)
+    If (self%Training_type .eq. 'Neural_Network') Then
       Temp = 'ml = MLPRegressor('
-    class is (Decision_Tree)
+    Else If (self%Training_type .eq. 'Decision_Tree') Then
       Temp = 'ml = tree.DecisionTreeRegressor('
-    class is (Random_Forest)
-      Temp = 'ml = tree.RandomForestRegressor('
-    end select
+    Else If (self%Training_type .eq. 'Random_Forest') Then
+      Temp = 'ml = RandomForestRegressor('
+    end If
+
 
     Do i = 1, self%num_para - 1
       Temp = Trim(Temp)//Trim(self%key(i)%str) // &
@@ -1775,7 +1783,7 @@ Contains
         ' = ' // Trim(self%value(i)%str) // ')'
 
 
-  end Subroutine Gen_Para_Script
+  end Subroutine Generate_Parameter_Script
 
 
 End Module Mod_Fsklearn_Essential

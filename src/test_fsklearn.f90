@@ -3,7 +3,7 @@ Program main_MPI
   Use mpi
   use mod_FSklearn
   implicit none
-  Class(Fsklearn_Example) :: F_sklearn
+  Type(Fsklearn_Example) :: F_sklearn
   character(100) :: test_data
   real(4) :: sample_data(1000,6)
   real(4) :: sample_data_mpi(250,6)
@@ -11,24 +11,28 @@ Program main_MPI
   integer :: myid, ier
 
   Call MPI_INIT(ier)
+  Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
 
-  Call F_Sklearn%initialization
+  Call F_Sklearn%Initialization
 
-  Write(*,*) '============================='
+  if (myid .eq. 0) then
+    Write(*,*) '============================='
 # if defined(FSKLEARN_TRAINING)
-  Write(*,*) 'Mode: Training'
+    Write(*,*) 'Mode: Training'
 # elif defined (FSKLEARN_PREDICTION)
-  Write(*,*) 'Mode: Prediction'
+    Write(*,*) 'Mode: Prediction'
 # endif
 
-  Write(*,*) 'MPI: YES'
-  Write(*,*) ' '
-  Write(*,*) 'Initialization complete!'
+    Write(*,*) 'MPI: YES'
+    Write(*,*) ' '
+    Write(*,*) 'Initialization complete!'
+  endif
 
 # if defined(FSKLEARN_TRAINING)
+  ! Read data
   Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
   if (myid .eq. 0) then !
-    test_data = Trim(self%coef_files_path)//'sample.dat'
+    test_data = Trim(F_Sklearn%coef_files_path)//'sample.dat'
     open(1,file = test_data)
     do i = 1,1000
       read(1,*) sample_data(i,:)
@@ -42,34 +46,40 @@ Program main_MPI
     sample_data_mpi(i,:) = sample_data(i+250*myid,:)
   end do
 
-  Call F_Sklearn%Gen_Training(sample_data_mpi, 250)
-  write(*,*) 'Complete Training'
-  write(*,*) ''
+  Call F_Sklearn%Gen_Training(sample_data_mpi)
 
-  Call F_Sklearn%PY_Training
+  If (myid .eq.0) Then
+    write(*,*) 'Complete Generating training data'
+    write(*,*) 'Calling training.py for training'
+
+    Call F_Sklearn%PY_Training
+    Write(*,*) '============================='
+  End If
 
 # endif
 
 # if defined(FSKLEARN_PREDICTION)
-  F_Sklearn%inputs=[-0.99,0.141067, -0.54]
-  F_Sklearn%outputs = F_Sklearn%predict(F_Sklearn%inputs,F_Sklearn%n_inputs,F_Sklearn%n_outputs)
+  Print *, F_sklearn%Prediction([-0.990000, 0.141067, -0.560000])
   write(*,*) 'Complete prediction'
   write(*,*) "results are:", F_Sklearn%outputs
 # endif
+
+  Call MPI_Barrier(MPI_COMM_WORLD, ier)
 
 
 End Program main_MPI
 
 # else
 ! sequential version
-Program main_sequential
+Program main
   use mod_FSklearn
   implicit none
-  Type(Fsklearn_Example) :: F_Sklearn
+  Type(Fsklearn_Example) :: F_sklearn
   character(100) :: test_data
   real(4) :: sample_data(1000,6)
   integer :: i
-  integer :: myid, ier
+
+  Call F_Sklearn%Initialization
 
   Write(*,*) '============================='
 # if defined(FSKLEARN_TRAINING)
@@ -82,30 +92,30 @@ Program main_sequential
   Write(*,*) ' '
   Write(*,*) 'Initialization complete!'
 
-  Call F_Sklearn%initialization
-
 # if defined(FSKLEARN_TRAINING)
+  ! Read data
   test_data = Trim(F_Sklearn%coef_files_path)//'sample.dat'
   open(1,file = test_data)
   do i = 1,1000
     read(1,*) sample_data(i,:)
   end do
 
-  Call F_Sklearn%Gen_Training(sample_data, 1000)
-  write(*,*) 'Complete Generate Training Data'
-  write(*,*) ' '
+  Call F_Sklearn%Gen_Training(sample_data)
+
+  write(*,*) 'Complete Generating training data'
+  write(*,*) 'Calling training.py for training'
 
   Call F_Sklearn%PY_Training
+  Write(*,*) '============================='
+
 # endif
 
 # if defined(FSKLEARN_PREDICTION)
-  F_Sklearn%inputs=[-0.99,0.141067, -0.54]
-  F_Sklearn%outputs = F_Sklearn%predict(F_Sklearn%inputs,F_Sklearn%n_inputs,F_Sklearn%n_outputs)
+  Print *, F_sklearn%Prediction([-0.990000, 0.141067, -0.560000])
   write(*,*) 'Complete prediction'
   write(*,*) "results are:", F_Sklearn%outputs
 # endif
 
-  Write(*,*) '============================='
 
-End Program main_sequential
+End Program main
 # endif

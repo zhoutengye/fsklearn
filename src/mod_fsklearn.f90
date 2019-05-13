@@ -1,188 +1,234 @@
-!---------------------------------------------------------
-! mod_fsklearn
-!---------------------------------------------------------
-!
-! - Some modification needs to be done if you do not want
-!   to change much to your code, including:
-!   + Initialization
-!   + Define the input and output vector and interface
-!
-! The Fsklearn_Initialization Do the following things:
-! 1. read the coefficients from namelist file
-! 2. write the coefficients to the json file (if TRAINING
-!    flag is defined)
-! 3. determine the machine learning method and assign
-!    the procedure pointer to the corresponding
-!    Subroutines.
-!
-!---------------------------------------------------------
-! Flow chart for TRAINING:
-! (Search the keyword TR_* to see the corresponding location)
-!---------------------------------------------------------
-!  - TR_1: Read from *.namelist file
-!  - TR_2: Choose the training type
-!    + Write to the .json file for python
-!  - PR_3: Determine the training type
-!    + the pointer procedure are assigned
-!  - TR_4: Get training data
-!    + May occur more than once
-!  - TR_5: Write training data to data file
-!    + May occur more than once
-!  - TR_6: Call the *.py file for training
-!    + [TO_UPDATE]
-!    + Call from system command
-!    + Execute after the program
-!    + The coefficients for training comes from the .json file
-!  - TR_6: Training to write *.dat file
-!    + *.dat files are coefficients for prediction
-!
-!---------------------------------------------------------
-! Flow chart for PREDICTION:
-! (Search the keyword PR_* to see the corresponding location)
-!---------------------------------------------------------
-!  - PR_1: Read from *.namelist file
-!  - PR_2: Determine the training type
-!    + the pointer procedure are assigned
-!  - PR_3: Read coefficients
-!    + Read from the corresponding .dat
-!  - PR_4: Predict
-!    + May occur more than once
-!
 !--------------------------------------------------------
-! Module variables:
-!--------------------------------------------------------
-!
-! PS:
-!    - Precision for float number.
-!    - PS = 4: single precision
-!    - PS = 8: double precision
-!
-! Fsklearn_Define:
-!    - Derived type that contains the machine learning
-!       variables. It can do training and prediction
-!       with a uniform way.
-!    - %n_inputs:
-!       + length of the input vector
-!       + It is necessary to provide the length of the
-!         input vector during initialization.
-!    - %n_outputs:
-!       + length of the output vector
-!       + It is necessary to provide the length of the
-!         output vector during initialization.
-!    - %Inputs:
-!       + Input vector, not necessary
-!    - %Outputs:
-!       + Output vector, not necessary
-!    - %Coef_Read:
-!       + Read the Coefficients and coefficients during
-!         initialization for PREDICTION.
-!    - %Predict:
-!       + Predict procedure
-!    - %Gen_Training:
-!       + Procedure for generate training data, can be
-!         point to other subroutines.
-!    - %Predict:
-!       + Procedure for initialization, can be point to
-!         other subroutines.
-! F_sklearn:
-!    - Derived type variable for Fsklearn_Define
-!
+! Module for user to buld their own API to the specific
+! computational models
 !--------------------------------------------------------
 !
 ! by Zhouteng Ye
-! Last update: 04/17/2019
+! Last update: 05/12/2019
 !---------------------------------------------------------
+
+# if defined (PARALLEL)
 Module Mod_Fsklearn
 
-  Use Mod_Fsklearn_Essential
+  Use Mod_Fsklearn_Essential ! Necessary to use this module
   Private
+  Public Fsklearn_Example
 # if defined(DOUBLE_PRECISION)
   Integer, Private, Parameter :: PS = 8
 # else
   Integer, Private, Parameter :: PS = 4
 # endif
 
-  Type, Public, Extends(Neural_Network) :: Fsklearn_Example
-    Contains
-      Procedure :: Initialization
-      Procedure :: Gen_Training => Generate_Training_Data
-      Procedure :: Py_Training => Training
+  ! The pre-processor flags is not necessary, usually the type
+  ! is determined while building the API to the computational model
+# if(NeuralNetwork)
+  Type, Extends(Neural_Network) :: Fsklearn_Example
+# elif defined (DecisionTree)
+  Type, Extends(Decision_Tree) :: Fsklearn_Example
+# else
+  Type, Extends(Random_Forest) :: Fsklearn_Example
+# endif
+  ! define some variables specifically for the computational model
+    Integer :: num_data_sets
+  Contains
+    ! define some procedures for the computational model
+    Procedure :: Initialization => Example_Initialization
+    Procedure :: Gen_Training   => Example_Generate_Training_Data
+    Procedure :: Prediction   => Example_Prediction
+    Procedure :: Py_Training    => Example_Training
   End type Fsklearn_Example
 
 Contains
 
-  Subroutine Initialization(self)
+  Subroutine Example_Initialization(self)
     Implicit None
     Class(Fsklearn_Example) :: self
 
-  End Subroutine Initialization
+    ! Set up parameters if possible
+    self%training_data_path   = 'build/training/'
+    self%coef_files_path      = 'build/fsklearn_files/'
+    self%set_ML_file          = 'fsklearn_coef.namelist' ! default value
+    self%training_input_name  = 'training_input'         ! default value
+    self%training_output_name = 'training_output'        ! default value
+    self%training_py          = 'training.py'            ! default value
 
-  Subroutine Generate_Training_Data &
-      (self, T_data, data_num)
+    Call self%Common_Initialization ! Necessary
 
-# if defined (PARALLEL)
+    self%num_data_sets = 250 ! assgin value to user defined variable
+
+  End Subroutine Example_Initialization
+
+
+  Subroutine Example_Generate_Training_Data(self, T_data)
+
     Use mpi
-# endif
     Implicit None
     Class(Fsklearn_Example) :: self
-# if defined (PARALLEL)
     Integer  :: myid, n_proc, ier
-# endif
-    Integer  :: data_num
     Integer  :: num_total
-    Real(PS), Dimension(data_num, self%n_inputs+self%n_outputs) :: T_data
+    Real(PS), Dimension(self%num_data_sets, self%n_inputs+self%n_outputs) :: T_data
+    Real(PS), Dimension(self%n_inputs) :: input
+    Real(PS), Dimension(self%n_outputs) :: output
     Integer   :: i
 
     num_total = self%n_inputs + self%n_outputs
 
-# if defined (PARALLEL)
     Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
-    Do i = 1, data_num
-      Call Write_Line(2000+myid,T_data(i,1:self%n_inputs),self%n_inputs)
-      Call Write_Line(3000+myid,T_data(i,self%n_inputs+1:num_total),self%n_outputs)
-    End Do
-# else
-    Do i = 1, data_num
-      Call Write_Line(2000,T_data(i,1:self%n_inputs),self%n_inputs)
-      Call Write_Line(3000,T_data(i,self%n_inputs+1:num_total),self%n_outputs)
-    End Do
-# endif
+    If (myid .eq. 0) Then
+      Do i = 1, self%num_data_sets
+        input = T_data(i, 1:self%n_inputs)
+        output = T_data(i, self%n_inputs+1:self%n_outputs)
+        ! Write line function is public in module mod_fsklearn_essential
+        ! Call with
+        !   Write_Line(file_number, input_vecrot, output_vector)
+        Call Write_Line(2000+myid, input, self%n_outputs)
+        Call Write_Line(3000+myid, output, self%n_outputs)
+      End Do
+    End If
 
-  End Subroutine Generate_Training_Data
+  End Subroutine Example_Generate_Training_Data
+
+
+  Function Example_Prediction(self, input)
+    Implicit None
+    Class(Fsklearn_Example) :: self
+    Real(PS), Dimension(self%n_inputs) :: input
+    Real(PS), Dimension(self%n_outputs) :: Example_Prediction
+
+    Example_Prediction = self%predict_one(input)
+
+  End Function Example_Prediction
+
 
   !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Call python to train↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
   !---------------------------------------------------------------
   ! If train_after_run is set as .True. in the .namelist file,
   ! run the python file after training.
   !---------------------------------------------------------------
-  Subroutine Training(self)
-# if defined (PARALLEL)
+  Subroutine Example_Training(self)
     Use mpi
     Implicit None
     Class(Fsklearn_Example) :: self
 
     Integer :: ier, myid
 
-    If (self%train_after_run .eqv. .True.) Then
-      Call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ier)
-
-      If (myid .eq. 0) then
-        Call Execute_Command_Line('python '//Adjustl(Trim(self%coef_files_path)) &
-            //Adjustl(Trim(self%training_py)) )
-      End If
-    End If
-
-    Call MPI_BARRIER(MPI_COMM_WORLD, ier)
-# else
-    Implicit None
-    Class(Fsklearn_Example) :: self
+    print *, self%train_after_run 
     If (self%train_after_run .eqv. .True.) Then
       Call Execute_Command_Line('python '//Adjustl(Trim(self%coef_files_path)) &
-          //Adjustl(Trim(self%training_py)) )
+            //Adjustl(Trim(self%training_py)) )
     End If
-# endif
 
-  End Subroutine Training
+  End Subroutine Example_Training
   !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑end training↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
+
+
 End Module Mod_Fsklearn
+#else
+Module Mod_Fsklearn
+
+  Use Mod_Fsklearn_Essential ! Necessary to use this module
+  Private
+  Public Fsklearn_Example
+# if defined(DOUBLE_PRECISION)
+  Integer, Private, Parameter :: PS = 8
+# else
+  Integer, Private, Parameter :: PS = 4
+# endif
+
+  ! The pre-processor flags is not necessary, usually the type
+  ! is determined while building the API to the computational model
+# if(NeuralNetwork)
+  Type, Extends(Neural_Network) :: Fsklearn_Example
+# elif defined (DecisionTree)
+  Type, Extends(Decision_Tree) :: Fsklearn_Example
+# else
+  Type, Extends(Random_Forest) :: Fsklearn_Example
+# endif
+  ! define some variables specifically for the computational model
+    Integer :: num_data_sets
+  Contains
+    ! define some procedures for the computational model
+    Procedure :: Initialization => Example_Initialization
+    Procedure :: Gen_Training   => Example_Generate_Training_Data
+    Procedure :: Prediction   => Example_Prediction
+    Procedure :: Py_Training    => Example_Training
+  End type Fsklearn_Example
+
+Contains
+
+  Subroutine Example_Initialization(self)
+    Implicit None
+    Class(Fsklearn_Example) :: self
+
+    ! Set up parameters if possible
+    self%training_data_path   = 'build/training/'
+    self%coef_files_path      = 'build/fsklearn_files/'
+    self%set_ML_file          = 'fsklearn_coef.namelist' ! default value
+    self%training_input_name  = 'training_input'         ! default value
+    self%training_output_name = 'training_output'        ! default value
+    self%training_py          = 'training.py'            ! default value
+
+    Call self%Common_Initialization ! Necessary
+
+    self%num_data_sets = 1000 ! assgin value to user defined variable
+
+  End Subroutine Example_Initialization
+
+
+  Subroutine Example_Generate_Training_Data(self, T_data)
+
+    Implicit None
+    Class(Fsklearn_Example) :: self
+    Integer  :: num_total
+    Real(PS), Dimension(self%num_data_sets, self%n_inputs+self%n_outputs) :: T_data
+    Real(PS), Dimension(self%n_inputs) :: input
+    Real(PS), Dimension(self%n_outputs) :: output
+    Integer   :: i
+
+    num_total = self%n_inputs + self%n_outputs
+
+    Do i = 1, self%num_data_sets
+      input = T_data(i, 1:self%n_inputs)
+      output = T_data(i, self%n_inputs+1:self%n_outputs)
+      ! Write line function is public in module mod_fsklearn_essential
+      ! Call with
+      !   Write_Line(file_number, input_vecrot, output_vector)
+      Call Write_Line(2000, input, self%n_outputs)
+      Call Write_Line(3000, output, self%n_outputs)
+    End Do
+
+  End Subroutine Example_Generate_Training_Data
+
+
+  Function Example_Prediction(self, input)
+    Implicit None
+    Class(Fsklearn_Example) :: self
+    Real(PS), Dimension(self%n_inputs) :: input
+    Real(PS), Dimension(self%n_outputs) :: Example_Prediction
+
+    Example_Prediction = self%predict_one(input)
+
+  End Function Example_Prediction
+
+
+  !↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Call python to train↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  !---------------------------------------------------------------
+  ! If train_after_run is set as .True. in the .namelist file,
+  ! run the python file after training.
+  !---------------------------------------------------------------
+  Subroutine Example_Training(self)
+    Implicit None
+    Class(Fsklearn_Example) :: self
+
+
+    Call Execute_Command_Line('python '//Adjustl(Trim(self%coef_files_path)) &
+        //Adjustl(Trim(self%training_py)) )
+
+  End Subroutine Example_Training
+  !↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑end training↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+
+
+End Module Mod_Fsklearn
+# endif

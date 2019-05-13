@@ -11,17 +11,20 @@
 #        Used to choose two cases for test
 #        Not necessary for the implementation
   # FLAG_2 = -DPARALLEL
-  FLAG_3 = -DFSKLEARN_TRAINING
-  # FLAG_4 = -DFSKLEARN_PREDICTION
+  # FLAG_3 = -DFSKLEARN_TRAINING
+	FLAG_4 = -DFSKLEARN_PREDICTION
+	# FLAG_5 = -DNeuralNetwork
+	# FLAG_5 = -DDecisionTree
+	FLAG_5 = -DRandomForest
 
 #--------------------fortran compiler and flags----------------------------
   CPP      = /usr/bin/cpp 
   CPPFLAGS = -P -traditional 
   CPPARGS  = $(CPPFLAGS) $(FLAG_1) $(FLAG_2) $(FLAG_3) $(FLAG_4) $(FLAG_5) 
 
-	FC       = ifort
+	# FC       = ifort
 	# FC       = mpiifort
-	# FC       = gfortran
+	FC       = gfortran
 	# FC       = mpif90
   OPT      =  -O3
   FCFLAGS  = $(OPT)

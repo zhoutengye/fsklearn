@@ -404,3 +404,98 @@ program main
   ! a2 = learn%Predict_One(a1)
 
 end program main
+
+!---------------------------------------------------------
+! mod_fsklearn
+!---------------------------------------------------------
+!
+! - Some modification needs to be done if you do not want
+!   to change much to your code, including:
+!   + Initialization
+!   + Define the input and output vector and interface
+!
+! The Fsklearn_Initialization Do the following things:
+! 1. read the coefficients from namelist file
+! 2. write the coefficients to the json file (if TRAINING
+!    flag is defined)
+! 3. determine the machine learning method and assign
+!    the procedure pointer to the corresponding
+!    Subroutines.
+!
+!---------------------------------------------------------
+! Flow chart for TRAINING:
+! (Search the keyword TR_* to see the corresponding location)
+!---------------------------------------------------------
+!  - TR_1: Read from *.namelist file
+!  - TR_2: Choose the training type
+!    + Write to the .json file for python
+!  - PR_3: Determine the training type
+!    + the pointer procedure are assigned
+!  - TR_4: Get training data
+!    + May occur more than once
+!  - TR_5: Write training data to data file
+!    + May occur more than once
+!  - TR_6: Call the *.py file for training
+!    + [TO_UPDATE]
+!    + Call from system command
+!    + Execute after the program
+!    + The coefficients for training comes from the .json file
+!  - TR_6: Training to write *.dat file
+!    + *.dat files are coefficients for prediction
+!
+!---------------------------------------------------------
+! Flow chart for PREDICTION:
+! (Search the keyword PR_* to see the corresponding location)
+!---------------------------------------------------------
+!  - PR_1: Read from *.namelist file
+!  - PR_2: Determine the training type
+!    + the pointer procedure are assigned
+!  - PR_3: Read coefficients
+!    + Read from the corresponding .dat
+!  - PR_4: Predict
+!    + May occur more than once
+!
+!--------------------------------------------------------
+! Module variables:
+!--------------------------------------------------------
+!
+! PS:
+!    - Precision for float number.
+!    - PS = 4: single precision
+!    - PS = 8: double precision
+!
+! Fsklearn_Define:
+!    - Derived type that contains the machine learning
+!       variables. It can do training and prediction
+!       with a uniform way.
+!    - %n_inputs:
+!       + length of the input vector
+!       + It is necessary to provide the length of the
+!         input vector during initialization.
+!    - %n_outputs:
+!       + length of the output vector
+!       + It is necessary to provide the length of the
+!         output vector during initialization.
+!    - %Inputs:
+!       + Input vector, not necessary
+!    - %Outputs:
+!       + Output vector, not necessary
+!    - %Coef_Read:
+!       + Read the Coefficients and coefficients during
+!         initialization for PREDICTION.
+!    - %Predict:
+!       + Predict procedure
+!    - %Gen_Training:
+!       + Procedure for generate training data, can be
+!         point to other subroutines.
+!    - %Predict:
+!       + Procedure for initialization, can be point to
+!         other subroutines.
+! F_sklearn:
+!    - Derived type variable for Fsklearn_Define
+!
+!--------------------------------------------------------
+!
+! by Zhouteng Ye
+! Last update: 04/17/2019
+!---------------------------------------------------------
