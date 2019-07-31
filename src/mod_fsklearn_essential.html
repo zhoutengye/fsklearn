@@ -1,0 +1,1435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-07-31 Wed 17:09 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="yeldon" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4ca0957">1. Mod_Fsklearn_Essential</a>
+<ul>
+<li><a href="#org6cc92cc">1.1. Public classes</a></li>
+<li><a href="#orgdf5547c">1.2. <b>Fsklearn_IO</b> class</a>
+<ul>
+<li><a href="#orgf509b66">1.2.1. List of the variables in the class</a></li>
+</ul>
+</li>
+<li><a href="#orgc4a2a39">1.3. Common_Initialization</a></li>
+<li><a href="#org46fb25d">1.4. Common_Read_Coef</a></li>
+<li><a href="#org9dfcd95">1.5. NN_Read_Coef</a></li>
+<li><a href="#org012d786">1.6. DT_Read_Coef</a></li>
+<li><a href="#orgfd8a245">1.7. RF_Read_Coef</a></li>
+<li><a href="#org324a075">1.8. NN_Predict_One</a></li>
+<li><a href="#org46cf1f1">1.9. DT_Predict_One</a></li>
+<li><a href="#org8118e9d">1.10. RF_Predict_One</a></li>
+<li><a href="#org415c32e">1.11. Activation_logistic</a></li>
+<li><a href="#org69b593a">1.12. Activation_tanh</a></li>
+<li><a href="#org95e7212">1.13. Activation_ReLU</a></li>
+<li><a href="#org6cbc1ff">1.14. Activation_identity</a></li>
+<li><a href="#org007da0c">1.15. Activation_softmax</a></li>
+<li><a href="#org3870b43">1.16. Write_Line_Integer</a></li>
+<li><a href="#org4a90cd1">1.17. Write_Line_Real</a></li>
+<li><a href="#orgafd2eed">1.18. Generate_Training_Python</a></li>
+<li><a href="#org035bd16">1.19. PY_main</a></li>
+<li><a href="#org7a212e3">1.20. Py_import</a></li>
+<li><a href="#org1dc70d3">1.21. PY_sk2f</a></li>
+<li><a href="#org620c7e9">1.22. Common_Read_and_Update_Param</a></li>
+<li><a href="#org792334a">1.23. NN_Read_and_Update_Param</a></li>
+<li><a href="#orgce77b8e">1.24. DT_Read_and_Update_Param</a></li>
+<li><a href="#org5e8b600">1.25. RF_Read_and_Update_Param</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org4ca0957" class="outline-2">
+<h2 id="org4ca0957"><span class="section-number-2">1</span> Mod_Fsklearn_Essential</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>In this module, some essential parts for the fsklearn
+are defined. They include the basic class Fsklearn_IO</li>
+</ul>
+<p>
+three types of essential
+    functions, some files and some derived type variables.
+</p>
+<ul class="org-ul">
+<li>They will be used in mod_fsklearn to build the full
+machine learning module.</li>
+</ul>
+</div>
+<div id="outline-container-org6cc92cc" class="outline-3">
+<h3 id="org6cc92cc"><span class="section-number-3">1.1</span> Public classes</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li><b>Fsklearn_IO</b></li>
+<li><b>Neural_Nwtwoek</b></li>
+<li><b>Decision_Tree</b></li>
+<li><b>Random_Forest</b></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdf5547c" class="outline-3">
+<h3 id="orgdf5547c"><span class="section-number-3">1.2</span> <b>Fsklearn_IO</b> class</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Contains the genetic procedures for a machine learning training and prediction. 
+</p>
+</div>
+
+<div id="outline-container-orgf509b66" class="outline-4">
+<h4 id="orgf509b66"><span class="section-number-4">1.2.1</span> List of the variables in the class</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">traininig_type</td>
+<td class="org-left">the type of training. now should be</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><b>neural_network</b>, <b>decision_tree</b>, or <b>random_forest</b>.</td>
+</tr>
+
+<tr>
+<td class="org-left">training_script</td>
+<td class="org-left">the python script generated by fortran code</td>
+</tr>
+
+<tr>
+<td class="org-left">n_inputs</td>
+<td class="org-left">count of input variables</td>
+</tr>
+
+<tr>
+<td class="org-left">n_outputs</td>
+<td class="org-left">count of output variables</td>
+</tr>
+
+<tr>
+<td class="org-left">train_after_run</td>
+<td class="org-left">whether to run after training</td>
+</tr>
+
+<tr>
+<td class="org-left">num_para</td>
+<td class="org-left">numbers of coefficient from the training</td>
+</tr>
+
+<tr>
+<td class="org-left">key</td>
+<td class="org-left">the list of coefficient keys,</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">the length of the <code>key</code> is <code>num_para</code></td>
+</tr>
+
+<tr>
+<td class="org-left">value</td>
+<td class="org-left">the list of parameter values,</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">the length of the <code>value</code> is <code>num_para</code></td>
+</tr>
+
+<tr>
+<td class="org-left">coef_files_path</td>
+<td class="org-left">the path of the coefficient files</td>
+</tr>
+
+<tr>
+<td class="org-left">coef_file_name</td>
+<td class="org-left">the name of the coefficient file</td>
+</tr>
+
+<tr>
+<td class="org-left">set_ml_file</td>
+<td class="org-left">the <code>namelist</code> file for fortran code</td>
+</tr>
+
+<tr>
+<td class="org-left">training_data_path</td>
+<td class="org-left">the path of training data</td>
+</tr>
+
+<tr>
+<td class="org-left">training_input_name</td>
+<td class="org-left">the name of the training input file</td>
+</tr>
+
+<tr>
+<td class="org-left">training_output_name</td>
+<td class="org-left">the name of the trainign output file</td>
+</tr>
+</tbody>
+</table>
+
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of variables:</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-fortran">
+  Private
+
+  Public :: Write_Line
+  Public :: Fsklearn_IO
+  Public :: Neural_Network
+  Public :: Decision_Tree
+  Public :: Random_Forest
+
+  <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Subject to the choice of precision.</span>
+  <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Single precision by default</span>
+<span style="color: #bc6ec5;"># if defined</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">DOUBLE_PRECISION</span><span style="color: #4f97d7;">)</span>
+  <span style="color: #ce537a; font-weight: bold;">Integer</span>, <span style="color: #ce537a; font-weight: bold;">Parameter</span> :: PS = <span style="color: #a45bad;">8</span>
+<span style="color: #bc6ec5;"># else</span>
+  <span style="color: #ce537a; font-weight: bold;">Integer</span>, <span style="color: #ce537a; font-weight: bold;">Parameter</span> :: PS = <span style="color: #a45bad;">4</span>
+<span style="color: #bc6ec5;"># endif</span>
+
+  Type String
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">50</span><span style="color: #4f97d7;">)</span> :: str
+  <span style="color: #4f97d7; font-weight: bold;">End</span> type String
+
+  Type :: Fsklearn_IO
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">20</span><span style="color: #4f97d7;">)</span> :: training_type
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">1000</span><span style="color: #4f97d7;">)</span> :: Training_script
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: n_inputs
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: n_outputs
+    <span style="color: #ce537a; font-weight: bold;">Logical</span> :: train_after_run
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Allocatable :: Inputs<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Allocatable :: Outputs<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: num_para
+    Type<span style="color: #4f97d7;">(</span>String<span style="color: #4f97d7;">)</span> , Allocatable :: key<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    Type<span style="color: #4f97d7;">(</span>String<span style="color: #4f97d7;">)</span> , Allocatable :: value<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: Coef_files_path      = <span style="color: #2d9574;">'./'</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: Coef_File_Name       = <span style="color: #2d9574;">''</span> <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: set_ML<span style="color: #2aa1ae; background-color: #292e34;">_file          = 'fsklearn_coef.namelist'</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: training_py          = <span style="color: #2d9574;">'training.py'</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: training_data_path   = <span style="color: #2d9574;">'./'</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: training_input_name  = <span style="color: #2d9574;">'training_input'</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">100</span><span style="color: #4f97d7;">)</span> :: training_output_name = <span style="color: #2d9574;">'training_output'</span>
+  Contains
+    Procedure :: Common_Initialization
+    Procedure , pass<span style="color: #4f97d7;">(</span>self<span style="color: #4f97d7;">)</span> :: Read_Coef =&gt; Common_Read_Coef
+    Procedure :: Gen_PY =&gt; Generate_Training_Python
+    Procedure :: Read_Training_Param =&gt; Common_Read_and_Update_Param
+    Procedure :: Generate_Parameter_Script
+    Procedure :: Py_Import
+    Procedure :: PY_main
+    Procedure :: PY_sk2f
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Fsklearn_IO
+
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span><span style="color: #2aa1ae; background-color: #292e34;">Neural Networks variables&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span>
+
+  Type Ragged_Vector
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Allocatable :: Vec<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Ragged_vector
+
+  Type Ragged_Matrix
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Allocatable :: Mat<span style="color: #4f97d7;">(</span>:,:<span style="color: #4f97d7;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Ragged_Matrix
+
+  Type :: NN_activation
+    Procedure<span style="color: #4f97d7;">(</span>Sub_Interface<span style="color: #4f97d7;">)</span>, Pointer, NoPass :: activate =&gt; NULL<span style="color: #4f97d7;">()</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type NN_activation
+
+  <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">interface for choose activation type</span>
+  Interface
+    <span style="color: #4f97d7; font-weight: bold;">Function</span> <span style="color: #bc6ec5; font-weight: bold;">Sub_Interface</span><span style="color: #4f97d7;">(</span>n, X<span style="color: #4f97d7;">)</span>
+      Import :: PS
+      <span style="color: #ce537a; font-weight: bold;">Integer</span>,  Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+      <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">Dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+      <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">Dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Sub_Interface
+    <span style="color: #4f97d7; font-weight: bold;">End</span> <span style="color: #4f97d7; font-weight: bold;">Function</span> <span style="color: #bc6ec5; font-weight: bold;">Sub_Interface</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Interface
+
+  <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">neural network coefficients</span>
+  Type, Extends<span style="color: #4f97d7;">(</span>Fsklearn_IO<span style="color: #4f97d7;">)</span> :: Neural_Network
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: layers
+    <span style="color: #ce537a; font-weight: bold;">Integer</span>, Allocatable :: Layer_Size<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    Type<span style="color: #4f97d7;">(</span>Ragged_Vector<span style="color: #4f97d7;">)</span>, Allocatable :: Activations<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    Type<span style="color: #4f97d7;">(</span>Ragged_Vector<span style="color: #4f97d7;">)</span>, Allocatable :: Intercepts<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    Type<span style="color: #4f97d7;">(</span>Ragged_Matrix<span style="color: #4f97d7;">)</span>, Allocatable :: Coefs<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">10</span><span style="color: #4f97d7;">)</span> :: Activation_type
+    <span style="color: #ce537a; font-weight: bold;">Character</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">10</span><span style="color: #4f97d7;">)</span> :: out_Activation_type
+    Type<span style="color: #4f97d7;">(</span>NN_Activation<span style="color: #4f97d7;">)</span> :: Activation
+    Type<span style="color: #4f97d7;">(</span>NN_Activation<span style="color: #4f97d7;">)</span> :: Out_Activation
+    Contains
+      Procedure :: Read_Coef =&gt; NN_Read_Coef
+      Procedure :: Predict_One =&gt; NN_Predict_One
+      <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Vec =&gt; NN_Predict_Vec</span>
+      <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Mat =&gt; NN_Predict_Mat</span>
+      Procedure :: Read_Training_Param =&gt; NN_Read_and_Update_Param
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Neural_Network
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span><span style="color: #2aa1ae; background-color: #292e34;">End Neural Network Variables&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span>
+
+
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span><span style="color: #2aa1ae; background-color: #292e34;">Decision Tree Variables&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span>
+  Type Nodes
+    <span style="color: #ce537a; font-weight: bold;">Integer</span>  :: children_left
+    <span style="color: #ce537a; font-weight: bold;">Integer</span>  :: children_right
+    <span style="color: #ce537a; font-weight: bold;">Integer</span>  :: feature
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: threshold
+    <span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Allocatable :: Values<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+    <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Contains</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Nodes
+
+  type Trees
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: node_count
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: max_depth
+    Type<span style="color: #4f97d7;">(</span>Nodes<span style="color: #4f97d7;">)</span>, Allocatable :: Node<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">End</span> type Trees
+
+  Type, Extends<span style="color: #4f97d7;">(</span>Fsklearn_IO<span style="color: #4f97d7;">)</span> :: Decision_Tree
+    Type<span style="color: #4f97d7;">(</span>Trees<span style="color: #4f97d7;">)</span> :: Tree
+  Contains
+    Procedure :: Read_Coef =&gt; DT_Read_Coef
+    Procedure :: Predict_One =&gt; DT_Predict_One
+    <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Vec =&gt; DT_Predict_Vec</span>
+    <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Mat =&gt; DT_Predict_Mat</span>
+    Procedure :: Read_Training_Param =&gt; DT_Read_and_Update_Param
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Decision_Tree
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span><span style="color: #2aa1ae; background-color: #292e34;">End Decision Tree Variables&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span>
+
+
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span><span style="color: #2aa1ae; background-color: #292e34;">Random Forest Variables&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;&#8595;</span>
+  Type, Extends<span style="color: #4f97d7;">(</span>Fsklearn_IO<span style="color: #4f97d7;">)</span> :: Random_Forest
+    <span style="color: #ce537a; font-weight: bold;">Integer</span> :: tree_count
+    Type<span style="color: #4f97d7;">(</span>Trees<span style="color: #4f97d7;">)</span>, Allocatable :: Tree<span style="color: #4f97d7;">(</span>:<span style="color: #4f97d7;">)</span>
+  Contains
+    Procedure :: Read_Coef =&gt; RF_Read_Coef
+    Procedure :: Predict_One =&gt; RF_Predict_One
+    <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Vec =&gt; RF_Predict_Vec</span>
+    <span style="color: #2aa1ae; background-color: #292e34;">! </span><span style="color: #2aa1ae; background-color: #292e34;">Procedure :: Predict_Mat =&gt; RF_Predict_Mat</span>
+    Procedure :: Read_Training_Param =&gt; RF_Read_and_Update_Param
+  <span style="color: #4f97d7; font-weight: bold;">End</span> Type Random_Forest
+  <span style="color: #2aa1ae; background-color: #292e34;">!&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span><span style="color: #2aa1ae; background-color: #292e34;">End Random Forest Variables&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;&#8593;</span>
+
+  Interface Write_Line
+    Module Procedure :: Write_Line_Real
+    Module Procedure :: Write_Line_Integer
+  <span style="color: #4f97d7; font-weight: bold;">end</span> Interface Write_Line
+
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc4a2a39" class="outline-3">
+<h3 id="orgc4a2a39"><span class="section-number-3">1.3</span> Common_Initialization</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-fortran">Use mpi
+</pre>
+</div>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org46fb25d" class="outline-3">
+<h3 id="org46fb25d"><span class="section-number-3">1.4</span> Common_Read_Coef</h3>
+<div class="outline-text-3" id="text-1-4">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org9dfcd95" class="outline-3">
+<h3 id="org9dfcd95"><span class="section-number-3">1.5</span> NN_Read_Coef</h3>
+<div class="outline-text-3" id="text-1-5">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-fortran">Use mpi
+</pre>
+</div>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org012d786" class="outline-3">
+<h3 id="org012d786"><span class="section-number-3">1.6</span> DT_Read_Coef</h3>
+<div class="outline-text-3" id="text-1-6">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-fortran">Use mpi
+</pre>
+</div>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgfd8a245" class="outline-3">
+<h3 id="orgfd8a245"><span class="section-number-3">1.7</span> RF_Read_Coef</h3>
+<div class="outline-text-3" id="text-1-7">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-fortran">Use mpi
+</pre>
+</div>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org324a075" class="outline-3">
+<h3 id="org324a075"><span class="section-number-3">1.8</span> NN_Predict_One</h3>
+<div class="outline-text-3" id="text-1-8">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #2aa1ae; background-color: #292e34;">C</span><span style="color: #2aa1ae; background-color: #292e34;">lass(Neural_Network) :: self</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: NN_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: NN_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org46cf1f1" class="outline-3">
+<h3 id="org46cf1f1"><span class="section-number-3">1.9</span> DT_Predict_One</h3>
+<div class="outline-text-3" id="text-1-9">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #2aa1ae; background-color: #292e34;">C</span><span style="color: #2aa1ae; background-color: #292e34;">lass(Decision_Tree) :: self</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: DT_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: DT_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8118e9d" class="outline-3">
+<h3 id="org8118e9d"><span class="section-number-3">1.10</span> RF_Predict_One</h3>
+<div class="outline-text-3" id="text-1-10">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #2aa1ae; background-color: #292e34;">C</span><span style="color: #2aa1ae; background-color: #292e34;">lass(Random_Forest) :: self</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: input<span style="color: #4f97d7;">(</span>self%n_inputs<span style="color: #4f97d7;">)</span>
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: RF_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span> :: RF_Predict_One<span style="color: #4f97d7;">(</span>self%n_outputs<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org415c32e" class="outline-3">
+<h3 id="org415c32e"><span class="section-number-3">1.11</span> Activation_logistic</h3>
+<div class="outline-text-3" id="text-1-11">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_logistic
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_logistic
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org69b593a" class="outline-3">
+<h3 id="org69b593a"><span class="section-number-3">1.12</span> Activation_tanh</h3>
+<div class="outline-text-3" id="text-1-12">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_tanh
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_tanh
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org95e7212" class="outline-3">
+<h3 id="org95e7212"><span class="section-number-3">1.13</span> Activation_ReLU</h3>
+<div class="outline-text-3" id="text-1-13">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_ReLU
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_ReLU
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6cbc1ff" class="outline-3">
+<h3 id="org6cbc1ff"><span class="section-number-3">1.14</span> Activation_identity</h3>
+<div class="outline-text-3" id="text-1-14">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_identity
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_identity
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org007da0c" class="outline-3">
+<h3 id="org007da0c"><span class="section-number-3">1.15</span> Activation_softmax</h3>
+<div class="outline-text-3" id="text-1-15">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: n
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: X
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: tmp
+<span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_softmax
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Real</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">PS</span><span style="color: #4f97d7;">)</span>, <span style="color: #ce537a; font-weight: bold;">dimension</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">n</span><span style="color: #4f97d7;">)</span> :: Activation_softmax
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+<p>
+<b>None</b>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3870b43" class="outline-3">
+<h3 id="org3870b43"><span class="section-number-3">1.16</span> Write_Line_Integer</h3>
+<div class="outline-text-3" id="text-1-16">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4a90cd1" class="outline-3">
+<h3 id="org4a90cd1"><span class="section-number-3">1.17</span> Write_Line_Real</h3>
+<div class="outline-text-3" id="text-1-17">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgafd2eed" class="outline-3">
+<h3 id="orgafd2eed"><span class="section-number-3">1.18</span> Generate_Training_Python</h3>
+<div class="outline-text-3" id="text-1-18">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: file_num 
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org035bd16" class="outline-3">
+<h3 id="org035bd16"><span class="section-number-3">1.19</span> PY_main</h3>
+<div class="outline-text-3" id="text-1-19">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-fortran">Use MPI
+</pre>
+</div>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: file_num
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7a212e3" class="outline-3">
+<h3 id="org7a212e3"><span class="section-number-3">1.20</span> Py_import</h3>
+<div class="outline-text-3" id="text-1-20">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1dc70d3" class="outline-3">
+<h3 id="org1dc70d3"><span class="section-number-3">1.21</span> PY_sk2f</h3>
+<div class="outline-text-3" id="text-1-21">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org620c7e9" class="outline-3">
+<h3 id="org620c7e9"><span class="section-number-3">1.22</span> Common_Read_and_Update_Param</h3>
+<div class="outline-text-3" id="text-1-22">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, Intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: file_num
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org792334a" class="outline-3">
+<h3 id="org792334a"><span class="section-number-3">1.23</span> NN_Read_and_Update_Param</h3>
+<div class="outline-text-3" id="text-1-23">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, Intent<span style="color: #4f97d7;">(</span>In<span style="color: #4f97d7;">)</span> :: file_num
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgce77b8e" class="outline-3">
+<h3 id="orgce77b8e"><span class="section-number-3">1.24</span> DT_Read_and_Update_Param</h3>
+<div class="outline-text-3" id="text-1-24">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: file_num
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org5e8b600" class="outline-3">
+<h3 id="org5e8b600"><span class="section-number-3">1.25</span> RF_Read_and_Update_Param</h3>
+<div class="outline-text-3" id="text-1-25">
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fortran"><span style="color: #ce537a; font-weight: bold;">Integer</span>, intent<span style="color: #4f97d7;">(</span>in<span style="color: #4f97d7;">)</span> :: file_num
+</pre>
+</div>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+
+
+
+<ul class="org-ul">
+<li>Use of modules:</li>
+</ul>
+<p>
+<b>None</b>
+</p>
+
+<p>
+input variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<p>
+output variables
+</p>
+
+<p>
+<b>None</b>
+</p>
+
+<ul class="org-ul">
+<li>list of local variables:</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: yeldon</p>
+<p class="date">Created: 2019-07-31 Wed 17:09</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
